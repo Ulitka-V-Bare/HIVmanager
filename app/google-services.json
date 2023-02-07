@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "747138295781",
+    "project_id": "hivmanager-22e61",
+    "storage_bucket": "hivmanager-22e61.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:747138295781:android:64b1a6c9ab0035549a710c",
+        "android_client_info": {
+          "package_name": "com.example.hivmanager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "747138295781-f67h35cek2tb4jhisne6rpachdib0vmo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBX5ylDXqxqkAaA8cKVYT8TxgSwGnUz8wc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "747138295781-f67h35cek2tb4jhisne6rpachdib0vmo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

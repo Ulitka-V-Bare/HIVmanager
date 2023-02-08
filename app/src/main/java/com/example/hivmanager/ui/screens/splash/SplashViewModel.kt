@@ -28,7 +28,8 @@ class SplashViewModel @Inject constructor(
     }
     private fun onSplashScreenLaunched(){
         viewModelScope.launch{
-            delay(3000)
+            delay(1000)
+            auth.signOut()
             try{
                 auth.currentUser?.reload()
             }catch (e:FirebaseAuthInvalidUserException){

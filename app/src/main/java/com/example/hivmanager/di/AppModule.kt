@@ -2,6 +2,7 @@ package com.example.hivmanager.di
 
 import com.example.hivmanager.data.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -10,6 +11,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import java.util.concurrent.TimeUnit
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -25,4 +27,5 @@ object AppModule {
         auth:FirebaseAuth,
         firestore: FirebaseFirestore
     ):UserRepository = UserRepository(auth,firestore)
+
 }

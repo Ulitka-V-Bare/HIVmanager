@@ -41,6 +41,6 @@ fun SplashScreen(
             )
         )
     )) {
-
+        //place for logo
     }
 }

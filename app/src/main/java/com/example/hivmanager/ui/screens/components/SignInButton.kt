@@ -23,13 +23,11 @@ fun SignInButton(
         modifier=modifier,
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color.White.copy(alpha = 0.07f),
-            contentColor = Color.White,
 
         ),
         enabled=enabled,
         content = content,
-        border = BorderStroke(1.dp, MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)),
+        //border = BorderStroke(1.dp, MaterialTheme.colors.primary.copy(alpha = ContentAlpha.disabled)),
         shape = RoundedCornerShape(10.dp),
     )
 }

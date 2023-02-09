@@ -5,6 +5,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.hivmanager.ui.screens.chat.ChatScreen
+import com.example.hivmanager.ui.screens.home.HomeScreen
+import com.example.hivmanager.ui.screens.info.InfoScreen
 import com.example.hivmanager.ui.screens.signin.SignInScreen
 import com.example.hivmanager.ui.screens.signin.SignInScreenCodeSent
 import com.example.hivmanager.ui.screens.signin.SignInViewModel
@@ -22,12 +25,12 @@ fun SetupNavGraph(
         composable(
             route = Route.chat
         ){
-
+            ChatScreen(onNavigate = navController::navigate)
         }
         composable(
             route = Route.home
         ){
-
+            HomeScreen(onNavigate = navController::navigate)
         }
         composable(
             route = Route.splash
@@ -39,7 +42,7 @@ fun SetupNavGraph(
         composable(
             route = Route.info
         ){
-
+            InfoScreen(onNavigate = navController::navigate)
         }
         composable(
             route = Route.signIn

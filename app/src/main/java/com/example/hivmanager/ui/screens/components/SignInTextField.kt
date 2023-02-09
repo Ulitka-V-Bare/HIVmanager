@@ -2,6 +2,7 @@ package com.example.hivmanager.ui.screens.components
 
 import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.TextFieldColors
 import androidx.compose.material.TextFieldDefaults
@@ -33,8 +34,8 @@ fun SignInTextField(
         keyboardActions = setDefaultKeyboardActionIfNull(keyboardActions = keyboardActions),
         modifier = modifier,
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            unfocusedLabelColor = Color.White,
-            focusedLabelColor = Color.White
+            unfocusedBorderColor = MaterialTheme.colors.primary,
+            focusedBorderColor = MaterialTheme.colors.primaryVariant
         )
 
     )

@@ -1,8 +1,11 @@
 package com.example.hivmanager.ui.screens.signin
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,17 +14,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.hivmanager.R
 import com.example.hivmanager.navigation.NavigationEvent
 import com.example.hivmanager.ui.screens.components.SignInButton
 import com.example.hivmanager.ui.screens.components.SignInTextField
+import com.example.hivmanager.ui.theme.HIVmanagerTheme
 import kotlinx.coroutines.NonDisposableHandle.parent
 
 @Composable
@@ -65,24 +72,27 @@ fun SignInScreenCodeSentUi(
     isCodeError:Boolean = false
 ) {
     ConstraintLayout(modifier = Modifier
-        .fillMaxSize()
-        .background(
-            brush = Brush.linearGradient(
-                listOf(
-                    Color(0xFF6097ff),
-                    Color(0xFF136acb),
-                    Color(0xFF004099),
-                )
-            )
-        ),
+        .fillMaxSize().background(color = MaterialTheme.colors.background),
     ) {
-        val (codeField, textField, button, resendCodeOrChangePhoneRow) = createRefs()
+        val (codeField, textField, button, resendCodeOrChangePhoneRow,image) = createRefs()
+        Image (
+            modifier = Modifier
+                .width(300.dp)
+                .height(350.dp)
+                .constrainAs(image){
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+            ,
+            painter = painterResource(id = if(isSystemInDarkTheme())R.drawable.logo_light else R.drawable.logo_no_background),
+            contentDescription = "Big logo"
+        )
         Text(
             text = buildAnnotatedString {
                 append("We have sent a verification code to ")
                 withStyle(
                     style = SpanStyle(
-                        color = Color.White,
                         textDecoration = TextDecoration.Underline
                     )
                 ) {
@@ -96,7 +106,6 @@ fun SignInScreenCodeSentUi(
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 },
-            color = Color.White,
             textAlign = TextAlign.Center
         )
 
@@ -154,12 +163,10 @@ fun SignInScreenCodeSentUi(
                     .clickable(enabled = timerSeconds == 0) { onResendCodeButtonClick() },
                 text = text,
                 textDecoration = TextDecoration.Underline,
-                color = Color.White,
             )
             Spacer(modifier = Modifier.height(5.dp))
             Text(
                 text = " OR ",
-                color = Color.White
             )
             Spacer(modifier = Modifier.height(5.dp))
             Text(
@@ -167,8 +174,15 @@ fun SignInScreenCodeSentUi(
                     .clickable { onChangePhoneNumberClick() },
                 text = "Change phone number",
                 textDecoration = TextDecoration.Underline,
-                color = Color.White
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun SignInScreenCodeSentPreview(){
+    HIVmanagerTheme {
+        SignInScreenCodeSentUi()
     }
 }

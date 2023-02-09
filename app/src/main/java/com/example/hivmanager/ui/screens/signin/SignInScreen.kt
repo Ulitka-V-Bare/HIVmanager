@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -70,24 +71,18 @@ private fun SignInScreenUi(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                brush = Brush.linearGradient(
-                    listOf(
-                        Color(0xFF6097ff),
-                        Color(0xFF136acb),
-                        Color(0xFF004099),
-                    )
-                )
+                MaterialTheme.colors.background
             ),
     ) {
 
         val (phoneField, textField, button,logo) = createRefs()
         Image (
-            modifier = Modifier.width(250.dp).height(300.dp).constrainAs(logo){
-                bottom.linkTo(textField.top,25.dp)
+            modifier = Modifier.width(300.dp).height(350.dp).constrainAs(logo){
+                top.linkTo(parent.top)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
             },
-            painter = painterResource(id = R.drawable.logo),
+            painter = painterResource(id = if(isSystemInDarkTheme())R.drawable.logo_light else R.drawable.logo_no_background),
             contentDescription = "Big logo"
         )
         Text(
@@ -97,7 +92,6 @@ private fun SignInScreenUi(
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
             },
-            color = Color.White
         )
         SignInTextField(
             value = phoneFieldValue,

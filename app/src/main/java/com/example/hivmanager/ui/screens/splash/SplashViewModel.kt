@@ -40,7 +40,7 @@ class SplashViewModel @Inject constructor(
                 _navigationEvent.send(NavigationEvent.Navigate(Route.signIn,true))
             }
             else{
-                _navigationEvent.send(NavigationEvent.Navigate(Route.home,true))
+                _navigationEvent.send(NavigationEvent.Navigate(Route.addPill,true))
             }
         }
     }

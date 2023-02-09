@@ -2,6 +2,8 @@ package com.example.hivmanager.data.repository
 
 import android.app.Activity
 import android.util.Log
+import com.example.hivmanager.data.model.PillInfo
+import com.example.hivmanager.data.model.PillInfo_example
 import com.google.firebase.auth.*
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.concurrent.TimeUnit
@@ -13,6 +15,7 @@ class UserRepository @Inject constructor(
     private val auth:FirebaseAuth,
     private val firestore:FirebaseFirestore,
 ){
+    private val pills = listOf(PillInfo_example,PillInfo_example,PillInfo_example)
     fun sendVerificationCode(
         phoneNumber:String,
         callbacks :PhoneAuthProvider.OnVerificationStateChangedCallbacks,
@@ -27,6 +30,8 @@ class UserRepository @Inject constructor(
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
 
-
+    fun getUserPills(): List<PillInfo> {
+        return pills
+    }
 
 }

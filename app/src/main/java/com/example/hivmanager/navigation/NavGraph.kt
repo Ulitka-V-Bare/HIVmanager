@@ -5,9 +5,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.hivmanager.ui.screens.addpill.AddPillScreen
 import com.example.hivmanager.ui.screens.chat.ChatScreen
 import com.example.hivmanager.ui.screens.home.HomeScreen
 import com.example.hivmanager.ui.screens.info.InfoScreen
+import com.example.hivmanager.ui.screens.pillsreminder.MyPillsScreen
 import com.example.hivmanager.ui.screens.signin.SignInScreen
 import com.example.hivmanager.ui.screens.signin.SignInScreenCodeSent
 import com.example.hivmanager.ui.screens.signin.SignInViewModel
@@ -60,6 +62,16 @@ fun SetupNavGraph(
                 viewModel = viewModelHolder.getSharedViewModel(),
                 onNavigateUp = {navController.navigateUp()}
             )
+        }
+        composable(
+            route = Route.addPill
+        ){
+            AddPillScreen(onNavigate = navController::navigate)
+        }
+        composable(
+            route = Route.pillReminder
+        ){
+            MyPillsScreen(onNavigate = navController::navigate)
         }
     }
 }

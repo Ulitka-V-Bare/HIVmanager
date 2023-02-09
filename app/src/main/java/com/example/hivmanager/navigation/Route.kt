@@ -7,4 +7,6 @@ object Route {
     const val info = "info"
     const val home = "home"
     const val chat = "chat"
+    const val pillReminder = "pillReminder"
+    const val addPill = "addPill"
 }

@@ -44,7 +44,8 @@ fun MyPillsScreen(
         }
     }
     MyPillsScreenUi(
-        bottomNavBarNavigationEventSender = {viewModel.sendNavigationEvent(it)}
+        bottomNavBarNavigationEventSender = {viewModel.sendNavigationEvent(it)},
+        pillList = viewModel.getPills()
     )
 }
 

@@ -34,6 +34,8 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.filled.Done
+import com.example.hivmanager.ui.screens.components.MyFloatingActionButton
 
 @Composable
 fun AddPillScreen(
@@ -60,7 +62,8 @@ fun AddPillScreen(
         onPillDurationChange = {viewModel.onEvent(AddPillEvent.OnPillDurationChange(it))},
         pillTime = viewModel.state.pillTime,
         onTimeAdded = {viewModel.onEvent(AddPillEvent.OnPillTimeAdded(it))},
-        onDeletePillTimeClick = {viewModel.onEvent(AddPillEvent.OnDeletePillTimeClick(it))}
+        onDeletePillTimeClick = {viewModel.onEvent(AddPillEvent.OnDeletePillTimeClick(it))},
+        onConfirmClick = {viewModel.onEvent(AddPillEvent.OnConfirmClick)}
     )
 }
 
@@ -78,7 +81,8 @@ private fun AddPillScreenUi(
     pillDuration:String = "Аспирин",
     onPillDurationChange:(String)->Unit = {},
     onTimeAdded: (String) -> Unit = {},
-    onDeletePillTimeClick:(Int)->Unit = {}
+    onDeletePillTimeClick:(Int)->Unit = {},
+    onConfirmClick:()->Unit = {}
 ){
     val dateDialogState = rememberMaterialDialogState()
 
@@ -97,11 +101,19 @@ private fun AddPillScreenUi(
 
     Scaffold(
         topBar = { MyTopAppBar("Info") },
-        bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender,0) }
+        bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender, 0) },
+        floatingActionButton = {
+            MyFloatingActionButton(
+                imageVector = Icons.Filled.Done,
+                onClick = onConfirmClick
+            )
+        }
     ) {
-        Column(modifier = Modifier
-            .padding(it)
-            .padding(horizontal = 24.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .padding(horizontal = 24.dp)
+        ) {
             datePickerDialog(dateDialogState = dateDialogState, onDatePick = onPillStartDatePick)
 
             Spacer(modifier = Modifier.height(16.dp))

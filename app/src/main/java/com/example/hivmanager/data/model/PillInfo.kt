@@ -1,16 +1,17 @@
 package com.example.hivmanager.data.model
 
+import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 
-
+@Serializable
 data class PillInfo(
     val name: String = "",
-    val startDate:LocalDate = LocalDate.now(),
-    val finishDate:LocalDate = LocalDate.now().plusWeeks(1),
-    val timeToTakePill: MutableList<String> = mutableListOf()
+    val startDate:String = "19.02.2002",
+    val finishDate:String = "22.02.2002",
+    val timeToTakePill: List<String> = listOf()
 )
 
 val PillInfo_example = PillInfo(

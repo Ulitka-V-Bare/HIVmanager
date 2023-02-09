@@ -2,6 +2,7 @@ package com.example.hivmanager.ui.screens.splash
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.hivmanager.data.repository.UserRepository
 import com.example.hivmanager.navigation.NavigationEvent
 import com.example.hivmanager.navigation.Route
 import com.google.firebase.auth.FirebaseAuth
@@ -15,7 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-    val auth: FirebaseAuth
+    val auth: FirebaseAuth,
+    val userRepository: UserRepository
 ) :ViewModel(){
 
     private val _navigationEvent = Channel<NavigationEvent>()
@@ -28,7 +30,8 @@ class SplashViewModel @Inject constructor(
     }
     private fun onSplashScreenLaunched(){
         viewModelScope.launch{
-            delay(1000)
+            delay(500)
+            userRepository.loadPillInfoList(viewModelScope)
             //auth.signOut()
             try{
                 auth.currentUser?.reload()
@@ -37,10 +40,10 @@ class SplashViewModel @Inject constructor(
             }
                 //load data into UserRepository
             if(auth.currentUser==null){
-                _navigationEvent.send(NavigationEvent.Navigate(Route.signIn,true))
+                _navigationEvent.send(NavigationEvent.Navigate(Route.signIn,))
             }
             else{
-                _navigationEvent.send(NavigationEvent.Navigate(Route.addPill,true))
+                _navigationEvent.send(NavigationEvent.Navigate(Route.addPill,))
             }
         }
     }

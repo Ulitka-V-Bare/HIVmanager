@@ -8,4 +8,6 @@ sealed class AddPillEvent {
     data class OnPillDurationChange(val pillDuration:String):AddPillEvent()
     data class OnPillTimeAdded(val pillTime:String):AddPillEvent()
     data class OnDeletePillTimeClick(val pillTimeIndex:Int):AddPillEvent()
+
+    object OnConfirmClick:AddPillEvent()
 }

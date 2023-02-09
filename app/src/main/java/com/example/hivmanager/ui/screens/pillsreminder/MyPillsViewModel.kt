@@ -1,7 +1,9 @@
 package com.example.hivmanager.ui.screens.pillsreminder
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.hivmanager.data.model.PillInfo
 import com.example.hivmanager.data.repository.UserRepository
 import com.example.hivmanager.navigation.NavigationEvent
 import com.google.firebase.auth.FirebaseAuth
@@ -25,5 +27,8 @@ class MyPillsViewModel @Inject constructor(
         }
     }
 
-    val pills = userRepository.getUserPills()
+    fun getPills(): List<PillInfo> {
+        Log.d("MyPillsVM","${userRepository.getUserPills()}")
+        return userRepository.getUserPills()
+    }
 }

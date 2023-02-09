@@ -6,9 +6,11 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 fun MyFloatingActionButton(
+    imageVector:ImageVector = Icons.Filled.Add,
     onClick:()->Unit = {}
 ){
     FloatingActionButton(
@@ -16,7 +18,7 @@ fun MyFloatingActionButton(
         backgroundColor = MaterialTheme.colors.primary
         ) {
         Icon(
-            imageVector = Icons.Filled.Add,
+            imageVector = imageVector,
             contentDescription = "Add pill",
             tint = MaterialTheme.colors.background
         )

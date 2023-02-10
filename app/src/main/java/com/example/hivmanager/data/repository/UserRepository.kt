@@ -4,21 +4,21 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.datastore.dataStore
-import com.example.hivmanager.data.model.PillInfo
-import com.example.hivmanager.data.model.PillInfo_example
-import com.example.hivmanager.data.model.UserData
-import com.example.hivmanager.data.model.UserDataSerializer
+import com.example.hivmanager.data.model.*
+import com.example.hivmanager.ui.screens.chat.Message
 import com.google.firebase.auth.*
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.collections.immutable.mutate
-import kotlinx.collections.immutable.plus
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.checkerframework.checker.units.qual.A
+import kotlinx.coroutines.tasks.await
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,7 +30,8 @@ class UserRepository @Inject constructor(
     private val auth:FirebaseAuth,
     private val firestore:FirebaseFirestore,
     @ApplicationContext
-    val context: Context
+    val context: Context,
+    private val database:FirebaseDatabase
 ){
     var userData: UserData = UserData()
     fun loadPillInfoList(scope:CoroutineScope){
@@ -41,6 +42,19 @@ class UserRepository @Inject constructor(
 
     init {
         Log.d("repo","initialization")
+    }
+    fun addUserToDatabase(uid:String?){
+        var ifExists = false
+        if(uid==null) return
+        firestore.collection(Constants.USERS).document(uid).get().addOnCompleteListener() {task->
+            if(task.result.exists()) ifExists=true
+            if(!ifExists) {
+                firestore.collection(Constants.USERS).document(uid).set(
+                    mapOf("type" to "user"),
+                    SetOptions.merge()
+                )
+            }
+        }
     }
 
     fun sendVerificationCode(
@@ -80,5 +94,61 @@ class UserRepository @Inject constructor(
         }
         userData = userData.copy(pillInfoList = userData.pillInfoList.plus(pillInfo))
         Log.d("repo","$pillInfo")
+    }
+
+    fun sendMessage(message:String){
+        val ref = database.getReference("messages").child("testmessages").child("${com.google.firebase.Timestamp.now()}")
+        ref.updateChildren(mapOf(
+            "message" to message,
+            "time" to "${com.google.firebase.Timestamp.now().seconds}",
+            "author" to "${auth.uid}"
+        ))
+    }
+
+    fun setOnUpdateListener(onChildAddedListener: (DataSnapshot)->Unit){
+        val ref = database.getReference("messages").child("testmessages").addChildEventListener(
+            object :ChildEventListener{
+                override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                    onChildAddedListener(snapshot)
+                }
+
+                override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onChildRemoved(snapshot: DataSnapshot) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+
+            }
+        )
+
+    }
+
+    suspend fun getMessageList(chatID:String):List<Message>{
+        val messageList:MutableList<Message> = mutableListOf()
+        val ref = database.getReference("messages").child("testmessages").get().addOnCompleteListener {task->
+            if(task.isSuccessful){
+                val iterator = task.result.children.iterator()
+                while (iterator.hasNext()){
+                    messageList.add(
+                        Message(
+                            iterator.next().value.toString(),
+                            iterator.next().value.toString(),
+                            iterator.next().value.toString().toLong()
+                        )
+                    )
+                }
+            }
+        }.await()
+        return messageList
     }
 }

@@ -148,7 +148,7 @@ class SignInViewModel @Inject constructor(
         }
 
         //userRepository.sendVerificationCode(state.phoneNumber,callbacks)
-        userRepository.sendVerificationCode("+79831736430",callbacks,activity)
+        userRepository.sendVerificationCode("+${state.phoneNumber}",callbacks,activity)
 
     }
 
@@ -162,6 +162,7 @@ class SignInViewModel @Inject constructor(
                     viewModelScope.launch {
                         _navigationEvent.send(NavigationEvent.Navigate(Route.home))
                     }
+                    userRepository.addUserToDatabase(auth.uid)
                     Toast.makeText(context,"Successfully signed in",Toast.LENGTH_SHORT).show()
                     //val user = task.result?.user
                 } else {

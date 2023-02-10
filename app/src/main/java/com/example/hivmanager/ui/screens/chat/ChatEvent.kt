@@ -1,4 +1,6 @@
 package com.example.hivmanager.ui.screens.chat
 
-class ChatEvent {
+sealed class ChatEvent {
+    object OnSendMessageButtonClick:ChatEvent()
+    data class OnMessageValueChange(val message:String):ChatEvent()
 }

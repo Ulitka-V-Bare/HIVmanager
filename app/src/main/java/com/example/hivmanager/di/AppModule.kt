@@ -5,6 +5,8 @@ import com.example.hivmanager.data.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -25,13 +27,17 @@ object AppModule {
     @Provides
     fun provideFirebaseFirestore() = Firebase.firestore
 
+    @Provides
+    fun provideFirebaseDatabase() = Firebase.database
+
     @Singleton
     @Provides
     fun provideUserRepository(
         auth:FirebaseAuth,
         firestore: FirebaseFirestore,
         @ApplicationContext
-        context: Context
-    ):UserRepository = UserRepository(auth,firestore,context)
+        context: Context,
+        database:FirebaseDatabase
+    ):UserRepository = UserRepository(auth,firestore,context,database)
 
 }

@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "747138295781",
+    "firebase_url": "https://hivmanager-22e61-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "hivmanager-22e61",
     "storage_bucket": "hivmanager-22e61.appspot.com"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "747138295781-vd4qvhckb3e1v6odbn5jgl04622hpg24.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hivmanager",
+            "certificate_hash": "165f002fe6b4f3a5b11bee9345d4892073b4b745"
+          }
+        },
         {
           "client_id": "747138295781-f67h35cek2tb4jhisne6rpachdib0vmo.apps.googleusercontent.com",
           "client_type": 3

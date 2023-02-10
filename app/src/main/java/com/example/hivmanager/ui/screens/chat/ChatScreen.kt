@@ -1,6 +1,8 @@
 package com.example.hivmanager.ui.screens.chat
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -20,7 +22,7 @@ import com.example.hivmanager.ui.theme.HIVmanagerTheme
 @Composable
 fun ChatScreen(
     onNavigate: (route: String, popBackStack: Boolean) -> Unit,
-    viewModel: InfoViewModel = hiltViewModel()
+    viewModel: ChatViewModel = hiltViewModel()
 ) {
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect {
@@ -33,7 +35,11 @@ fun ChatScreen(
         }
     }
     ChatScreenUi(
-        bottomNavBarNavigationEventSender = {viewModel.sendNavigationEvent(it)}
+        bottomNavBarNavigationEventSender = {viewModel.sendNavigationEvent(it)},
+        textFieldValue = viewModel.state.message,
+        onTextFieldValueChange = {viewModel.onEvent(ChatEvent.OnMessageValueChange(it))},
+        onSendMessageButtonClick = {viewModel.onEvent(ChatEvent.OnSendMessageButtonClick)},
+        messageList = viewModel.state.allMessages
     )
 }
 
@@ -43,7 +49,8 @@ private fun ChatScreenUi(
     bottomNavBarNavigationEventSender:(NavigationEvent)->Unit = {},
     textFieldValue:String = "",
     onTextFieldValueChange:(String)->Unit = {},
-    onSendMessageButtonClick: ()->Unit = {}
+    onSendMessageButtonClick: ()->Unit = {},
+    messageList:List<Message> = listOf()
 ){
     Scaffold(
         topBar = { MyTopAppBar("Chat") },
@@ -55,13 +62,15 @@ private fun ChatScreenUi(
                 .fillMaxSize()
         ) {
             val(messages,input) = createRefs()
-            Column(modifier = Modifier.constrainAs(messages){
+            LazyColumn(modifier = Modifier.constrainAs(messages){
                 top.linkTo(parent.top)
                 bottom.linkTo(input.top)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
             }) {
-
+                itemsIndexed(messageList){index,message->
+                    Text(text = message.text)
+                }
             }
             Row(modifier = Modifier
                 .fillMaxWidth()

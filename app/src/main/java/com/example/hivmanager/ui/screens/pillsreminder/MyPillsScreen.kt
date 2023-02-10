@@ -9,24 +9,33 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.hivmanager.data.model.PillInfo
 import com.example.hivmanager.data.model.PillInfo_example
+import com.example.hivmanager.data.model.UserData
+import com.example.hivmanager.data.repository.dataStore
 import com.example.hivmanager.navigation.NavigationEvent
 import com.example.hivmanager.ui.screens.components.BottomNavBar
 import com.example.hivmanager.ui.screens.components.MyFloatingActionButton
 import com.example.hivmanager.ui.screens.components.MyTopAppBar
 import com.example.hivmanager.ui.theme.HIVmanagerTheme
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.MaterialDialogState
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 
 @Composable
 fun MyPillsScreen(
@@ -43,9 +52,12 @@ fun MyPillsScreen(
             }
         }
     }
+    val pillInfoList = viewModel.userRepository.context.dataStore.data.collectAsState(initial = UserData()).value
     MyPillsScreenUi(
         bottomNavBarNavigationEventSender = {viewModel.sendNavigationEvent(it)},
-        pillList = viewModel.getPills()
+        pillList = pillInfoList.pillInfoList,
+        onDeletePillClick = {viewModel.onEvent(MyPillsEvent.OnDeletePillInfoClick(it))},
+        onAddNewPillClick = {viewModel.onEvent(MyPillsEvent.OnAddNewPillInfoClick)}
     )
 }
 
@@ -53,24 +65,61 @@ fun MyPillsScreen(
 @Composable
 private fun MyPillsScreenUi(
     bottomNavBarNavigationEventSender:(NavigationEvent)->Unit = {},
-    pillList:List<PillInfo> = listOf(PillInfo_example,PillInfo_example,PillInfo_example)
+    pillList:List<PillInfo> = listOf(PillInfo_example,PillInfo_example,PillInfo_example),
+    onDeletePillClick:(Int)->Unit = {},
+    onAddNewPillClick:()->Unit={}
 ){
+
     Scaffold(
         topBar = { MyTopAppBar("My pills") },
         bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender,0) },
-        floatingActionButton = { MyFloatingActionButton()}
+        floatingActionButton = { MyFloatingActionButton(onClick = onAddNewPillClick)}
     ) {
+
         Column(modifier = Modifier.padding(it)) {
             pillList.forEachIndexed { index, pillInfo ->
-                MyPillCard(pillInfo)
+                val deletePillDialogState = rememberMaterialDialogState()
+                MyPillCard(pillInfo = pillInfo, onDeletePillClick = {deletePillDialogState.show()})
+                DeletePillDialog(
+                    dialogState = deletePillDialogState,
+                    onConfirmClick = {onDeletePillClick(index)})
             }
         }
 
     }
 }
 
+
 @Composable
-fun MyPillCard(pillInfo: PillInfo = PillInfo_example, modifier: Modifier = Modifier){
+fun DeletePillDialog(
+    dialogState: MaterialDialogState,
+    onConfirmClick: ()->Unit
+){
+    MaterialDialog(
+        dialogState = dialogState,
+        properties = DialogProperties (
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true,
+        ),
+        buttons = {
+            positiveButton(text = "Ok", onClick = onConfirmClick)
+            negativeButton(text = "Cancel")
+        }
+    ) {
+        Text(
+            text= "Вы уверены, что хотите удалить это напоминание?",
+            modifier = Modifier.padding(16.dp),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun MyPillCard(
+    pillInfo: PillInfo = PillInfo_example,
+    modifier: Modifier = Modifier,
+    onDeletePillClick: () -> Unit = {}
+){
     Surface(
         modifier = modifier.padding(8.dp),
         elevation = 4.dp
@@ -79,7 +128,7 @@ fun MyPillCard(pillInfo: PillInfo = PillInfo_example, modifier: Modifier = Modif
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(top = 3.dp),
+                    .padding(top = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Surface(
@@ -89,7 +138,25 @@ fun MyPillCard(pillInfo: PillInfo = PillInfo_example, modifier: Modifier = Modif
                 ) {}
             }
             Column(modifier = Modifier.weight(5f)) {
-                Text(text = "${pillInfo.name}", fontSize = 20.sp, fontWeight = FontWeight.Medium)
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(30.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                    ) {
+                    Text(
+                        text = "${pillInfo.name}",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    IconButton(onClick = onDeletePillClick) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "delete reminder",
+                        )
+                    }
+                }
                 Text(
                     text = buildAnnotatedString {
                         append("Время приема: ")

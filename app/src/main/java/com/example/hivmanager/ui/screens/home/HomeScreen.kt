@@ -2,7 +2,9 @@ package com.example.hivmanager.ui.screens.home
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ComposableOpenTarget
 import androidx.compose.runtime.LaunchedEffect
@@ -10,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.hivmanager.navigation.NavigationEvent
+import com.example.hivmanager.navigation.Route
 import com.example.hivmanager.ui.screens.components.BottomNavBar
 import com.example.hivmanager.ui.screens.components.MyTopAppBar
 import com.example.hivmanager.ui.screens.signin.SignInViewModel
@@ -31,23 +34,26 @@ fun HomeScreen(
         }
     }
     HomeScreenUi(
-        bottomNavBarNavigationEventSender = {viewModel.sendNavigationEvent(it)}
+        bottomNavBarNavigationEventSender = {viewModel.sendNavigationEvent(it)},
+        onOpenPillListClick = {viewModel.sendNavigationEvent(NavigationEvent.Navigate(Route.pillReminder))}
     )
 }
 
 
 @Composable
 private fun HomeScreenUi(
-    bottomNavBarNavigationEventSender:(NavigationEvent)->Unit = {}
+    bottomNavBarNavigationEventSender:(NavigationEvent)->Unit = {},
+    onOpenPillListClick:()->Unit={}
 ){
     Scaffold(
         topBar = {MyTopAppBar("Home")},
         bottomBar = {BottomNavBar(bottomNavBarNavigationEventSender,1)}
     ) {
         Column(modifier = Modifier.padding(it)) {
-
+            Button(onClick = onOpenPillListClick){
+                Text(text = "My pills")
+            }
         }
-
     }
 }
 

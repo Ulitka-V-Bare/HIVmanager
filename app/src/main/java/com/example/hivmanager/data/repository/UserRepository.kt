@@ -30,7 +30,7 @@ class UserRepository @Inject constructor(
     private val auth:FirebaseAuth,
     private val firestore:FirebaseFirestore,
     @ApplicationContext
-    private val context: Context
+    val context: Context
 ){
     var userData: UserData = UserData()
     fun loadPillInfoList(scope:CoroutineScope){
@@ -65,6 +65,13 @@ class UserRepository @Inject constructor(
         context.dataStore.updateData {
             it.copy(pillInfoList =pillsList.toPersistentList())
         }
+    }
+
+    suspend fun deletePillInfo(index:Int){
+        context.dataStore.updateData {
+            it.copy(pillInfoList = it.pillInfoList.minus(it.pillInfoList[index]))
+        }
+        userData = userData.copy(pillInfoList = userData.pillInfoList.minus(userData.pillInfoList[index]))
     }
 
     suspend fun addPillInfo(pillInfo: PillInfo){

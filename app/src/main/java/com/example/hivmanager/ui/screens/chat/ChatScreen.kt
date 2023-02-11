@@ -1,23 +1,34 @@
 package com.example.hivmanager.ui.screens.chat
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.hivmanager.navigation.NavigationEvent
 import com.example.hivmanager.ui.screens.components.BottomNavBar
+import com.example.hivmanager.ui.screens.components.LoadingGif
 import com.example.hivmanager.ui.screens.components.MyTopAppBar
 import com.example.hivmanager.ui.screens.info.InfoViewModel
 import com.example.hivmanager.ui.theme.HIVmanagerTheme
+import com.example.hivmanager.ui.theme.White200
+import com.example.hivmanager.ui.theme.White500
+import kotlinx.coroutines.NonDisposableHandle.parent
 
 @Composable
 fun ChatScreen(
@@ -34,65 +45,107 @@ fun ChatScreen(
             }
         }
     }
+
+
+
     ChatScreenUi(
-        bottomNavBarNavigationEventSender = {viewModel.sendNavigationEvent(it)},
+        bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) },
         textFieldValue = viewModel.state.message,
-        onTextFieldValueChange = {viewModel.onEvent(ChatEvent.OnMessageValueChange(it))},
-        onSendMessageButtonClick = {viewModel.onEvent(ChatEvent.OnSendMessageButtonClick)},
-        messageList = viewModel.state.allMessages
+        onTextFieldValueChange = { viewModel.onEvent(ChatEvent.OnMessageValueChange(it)) },
+        onSendMessageButtonClick = { viewModel.onEvent(ChatEvent.OnSendMessageButtonClick) },
+        messageList = viewModel.state.allMessages,
+        userID = viewModel.auth.uid,
+        lazyListState = viewModel.lazyColumnScrollState,
+        isLoading = viewModel.state.isLoading
     )
 }
 
 
 @Composable
 private fun ChatScreenUi(
-    bottomNavBarNavigationEventSender:(NavigationEvent)->Unit = {},
-    textFieldValue:String = "",
-    onTextFieldValueChange:(String)->Unit = {},
-    onSendMessageButtonClick: ()->Unit = {},
-    messageList:List<Message> = listOf()
-){
+    bottomNavBarNavigationEventSender: (NavigationEvent) -> Unit = {},
+    textFieldValue: String = "",
+    onTextFieldValueChange: (String) -> Unit = {},
+    onSendMessageButtonClick: () -> Unit = {},
+    messageList: List<Message> = listOf(),
+    userID: String? = "",
+    lazyListState: LazyListState = rememberLazyListState(),
+    isLoading:Boolean = false
+) {
     Scaffold(
         topBar = { MyTopAppBar("Chat") },
-        bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender,2) }
+        bottomBar = {
+            Column() {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    TextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = textFieldValue,
+                        onValueChange = onTextFieldValueChange,
+                        trailingIcon = {
+                            IconButton(onClick = onSendMessageButtonClick) {
+                                Icon(
+                                    imageVector = Icons.Filled.Send,
+                                    contentDescription = "send message",
+                                    tint = MaterialTheme.colors.primaryVariant
+                                )
+                            }
+                        }
+                    )
+                }
+                BottomNavBar(bottomNavBarNavigationEventSender, 2)
+            }
+        }
     ) {
-        ConstraintLayout(
+        Column(
             modifier = Modifier
                 .padding(it)
-                .fillMaxSize()
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            val(messages,input) = createRefs()
-            LazyColumn(modifier = Modifier.constrainAs(messages){
-                top.linkTo(parent.top)
-                bottom.linkTo(input.top)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            }) {
-                itemsIndexed(messageList){index,message->
-                    Text(text = message.text)
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LoadingGif(Modifier.size(60.dp))
                 }
             }
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .constrainAs(input) {
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }) {
-                TextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = textFieldValue,
-                    onValueChange = onTextFieldValueChange,
-                    trailingIcon = {
-                        IconButton(onClick = onSendMessageButtonClick) {
-                            Icon(
-                                imageVector = Icons.Filled.Send,
-                                contentDescription = "send message",
-                                tint = MaterialTheme.colors.primaryVariant
-                            )
+            else {
+                LazyColumn(state = lazyListState) {
+                    itemsIndexed(messageList) { index, message ->
+                        Row(
+                            horizontalArrangement = if (message.sender == userID) Arrangement.End else Arrangement.Start,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
+                        ) {
+                            Surface(
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .widthIn(max = 270.dp),
+                                elevation = 4.dp,
+                                color = if (message.sender == userID) MaterialTheme.colors.primary else MaterialTheme.colors.primaryVariant,
+                                shape = RoundedCornerShape(5.dp),
+
+                                ) {
+                                Text(
+                                    text = message.text,
+                                    modifier = Modifier.padding(
+                                        vertical = 8.dp,
+                                        horizontal = 10.dp
+                                    ),
+                                    color = if (isSystemInDarkTheme()) White500 else White200
+                                )
+                            }
                         }
                     }
-                )
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
             }
         }
     }
@@ -100,7 +153,7 @@ private fun ChatScreenUi(
 
 @Preview
 @Composable
-private fun ChatScreenPreview(){
+private fun ChatScreenPreview() {
     HIVmanagerTheme {
         ChatScreenUi()
     }

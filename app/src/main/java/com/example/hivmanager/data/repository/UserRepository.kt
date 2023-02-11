@@ -11,6 +11,7 @@ import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -105,11 +106,12 @@ class UserRepository @Inject constructor(
         ))
     }
 
-    fun setOnUpdateListener(onChildAddedListener: (DataSnapshot)->Unit){
+    fun setOnUpdateListener(onChildAddedListener: (DataSnapshot)->Unit,onLoaded:()->Unit){
         val ref = database.getReference("messages").child("testmessages").addChildEventListener(
             object :ChildEventListener{
                 override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                     onChildAddedListener(snapshot)
+                    onLoaded()
                 }
 
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
@@ -133,22 +135,34 @@ class UserRepository @Inject constructor(
 
     }
 
-    suspend fun getMessageList(chatID:String):List<Message>{
+    suspend fun getMessageList(chatID:String,onGetData:(MutableList<Message>)->Unit){
         val messageList:MutableList<Message> = mutableListOf()
-        val ref = database.getReference("messages").child("testmessages").get().addOnCompleteListener {task->
-            if(task.isSuccessful){
-                val iterator = task.result.children.iterator()
-                while (iterator.hasNext()){
-                    messageList.add(
-                        Message(
-                            iterator.next().value.toString(),
-                            iterator.next().value.toString(),
-                            iterator.next().value.toString().toLong()
-                        )
-                    )
+        val ref = database.getReference("messages").child("testmessages").addListenerForSingleValueEvent(
+            object:ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    for(child in snapshot.children){
+                        val iterator = child.children.iterator()
+                        while (iterator.hasNext()){
+                            val senderID = iterator.next().value
+                            val message = iterator.next().value
+                            val time = iterator.next().value
+                            messageList.add(
+                                Message(
+                                    senderID.toString(),
+                                    message.toString(),
+                                    time.toString().toLong()
+                                )
+                            )
+                        }
+                    }
+                    onGetData(messageList)
                 }
+
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+
             }
-        }.await()
-        return messageList
+        )
     }
 }

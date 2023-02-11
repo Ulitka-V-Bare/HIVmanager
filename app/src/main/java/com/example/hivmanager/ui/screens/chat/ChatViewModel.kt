@@ -1,6 +1,8 @@
 package com.example.hivmanager.ui.screens.chat
 
 import android.util.Log
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,6 +30,8 @@ class ChatViewModel  @Inject constructor(
     private val _navigationEvent = Channel<NavigationEvent>()
     val uiEvent = _navigationEvent.receiveAsFlow()
 
+    val lazyColumnScrollState = LazyListState()
+
 
 
     init {
@@ -35,9 +40,13 @@ class ChatViewModel  @Inject constructor(
 //                allMessages = userRepository.getMessageList("testmessages").sortedBy { it.time }
 //            )
 //        }
-        userRepository.setOnUpdateListener {
-            getNewMessages(it)
+        viewModelScope.launch {
+            userRepository.getMessageList("testmessages", { onGetDate(it) })
         }
+//        userRepository.setOnUpdateListener(
+//            onChildAddedListener = {getNewMessages(it)},
+//            onLoaded = {changeStateToLoaded()}
+//        )
     }
 
     fun onEvent(event: ChatEvent) {
@@ -47,6 +56,28 @@ class ChatViewModel  @Inject constructor(
         }
     }
 
+    private fun onGetDate(list:MutableList<Message>){
+        state = state.copy(
+            allMessages = list.sortedBy { it.time },
+            isLoading = false
+        )
+        Log.d("ChatViewModel","chat loaded")
+        userRepository.setOnUpdateListener(
+            onChildAddedListener = {getNewMessages(it)},
+            onLoaded = {}
+        )
+    }
+
+    private fun changeStateToLoaded(){
+
+        if(state.isLoading){
+            state=state.copy(
+                allMessages = state.allMessages.sortedBy { it.time },
+                isLoading = false
+            )
+            Log.d("ChatViewModel","chat loaded")
+        }
+    }
     private fun onSendMessageButtonClick(){
         userRepository.sendMessage(state.message)
         state=state.copy(message = "")
@@ -70,7 +101,16 @@ class ChatViewModel  @Inject constructor(
             val senderID = iterator.next().value
             val message = iterator.next().value
             val time = iterator.next().value
-            state=state.copy(allMessages = state.allMessages.plus(Message(senderID.toString(),message.toString(),time.toString().toLong())))
+            val myMessage = Message(senderID.toString(),message.toString(),time.toString().toLong())
+            if(myMessage !in state.allMessages) {
+                state = state.copy(
+                    allMessages = state.allMessages.plus(myMessage)
+                )
+                viewModelScope.launch {
+                    delay(100)
+                    lazyColumnScrollState.scrollToItem(state.allMessages.size)
+                }
+            }
             Log.d("ChatViewModel","$message")
         }
     }

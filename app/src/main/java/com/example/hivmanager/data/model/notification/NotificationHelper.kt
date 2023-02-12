@@ -13,11 +13,11 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.hivmanager.MainActivity
 import com.example.hivmanager.R
+import com.example.hivmanager.data.model.Constants.CHANNEL_ID
 
 class NotificationHelper(val context:Context) {
-    private val CHANNEL_ID = "HIV_manager_channel_id2"
-    private val NOTIFICATION_ID = 1
 
+    private val NOTIFICATION_ID = 1
 
     private fun createNotificationChannel(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -31,6 +31,11 @@ class NotificationHelper(val context:Context) {
             val notificationManager =  context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    fun getNotificationChannel():NotificationChannel{
+        val notificationManager =  context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        return notificationManager.getNotificationChannel(CHANNEL_ID)
     }
 
     fun createNotification(title: String, message: String){

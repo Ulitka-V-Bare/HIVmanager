@@ -36,9 +36,24 @@ class UserRepository @Inject constructor(
     private val database:FirebaseDatabase
 ){
     var userData: UserData = UserData()
+    var userType: String = ""
+    var userDoctorID: String = ""
+    var patientList:MutableList<String> = mutableListOf()
     fun loadPillInfoList(scope:CoroutineScope){
         scope.launch {
             userData = context.dataStore.data.first()
+        }
+    }
+
+    suspend fun loadUserData(uid: String){
+        val result = firestore.collection(Constants.USERS).document(uid).get().await()
+        userType = result.get("type").toString()
+        userDoctorID = result.get("doctor").toString()
+        if(userType=="doctor"){
+            val patients = firestore.collection(Constants.USERS).document(uid).collection("patients").get().await()
+            for(patient in patients){
+                patientList.add(patient.id)
+            }
         }
     }
 
@@ -52,7 +67,8 @@ class UserRepository @Inject constructor(
             if(task.result.exists()) ifExists=true
             if(!ifExists) {
                 firestore.collection(Constants.USERS).document(uid).set(
-                    mapOf("type" to "user"),
+                    mapOf("type" to "user","doctor" to "null"),
+
                     SetOptions.merge()
                 )
             }

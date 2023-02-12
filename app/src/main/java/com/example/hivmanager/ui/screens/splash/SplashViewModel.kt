@@ -34,6 +34,7 @@ class SplashViewModel @Inject constructor(
           //  auth.signOut()
             userRepository.loadPillInfoList(viewModelScope)
 
+
             try{
                 auth.currentUser?.reload()
             }catch (e:FirebaseAuthInvalidUserException){
@@ -44,7 +45,13 @@ class SplashViewModel @Inject constructor(
                 _navigationEvent.send(NavigationEvent.Navigate(Route.signIn,))
             }
             else{
-                _navigationEvent.send(NavigationEvent.Navigate(Route.home,))
+                userRepository.loadUserData(auth.uid!!)
+                if(userRepository.userType=="user"){
+                    _navigationEvent.send(NavigationEvent.Navigate(Route.home,))
+                }
+                if(userRepository.userType=="doctor"){
+                    _navigationEvent.send(NavigationEvent.Navigate(Route.doctorHome))
+                }
             }
         }
     }

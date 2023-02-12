@@ -9,4 +9,5 @@ object Route {
     const val chat = "chat"
     const val pillReminder = "pillReminder"
     const val addPill = "addPill"
+    const val doctorHome = "doctorHome"
 }

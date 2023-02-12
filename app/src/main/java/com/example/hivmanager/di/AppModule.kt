@@ -1,9 +1,11 @@
 package com.example.hivmanager.di
 
+import android.app.NotificationChannel
 import android.content.Context
 import com.example.hivmanager.data.model.notification.AlarmReceiver
 import com.example.hivmanager.data.model.notification.AlarmScheduler
 import com.example.hivmanager.data.model.notification.AndroidAlarmScheduler
+import com.example.hivmanager.data.model.notification.NotificationHelper
 import com.example.hivmanager.data.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthOptions
@@ -50,4 +52,9 @@ object AppModule {
         context: Context,
     ):AlarmScheduler = AndroidAlarmScheduler(context)
 
+    @Provides
+    fun provideNotificationChannel(
+        @ApplicationContext
+        context: Context,
+    ):NotificationChannel = NotificationHelper(context).getNotificationChannel()
 }

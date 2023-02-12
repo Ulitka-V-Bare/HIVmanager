@@ -73,6 +73,11 @@ fun SetupNavGraph(
         ){
             MyPillsScreen(onNavigate = navController::navigate)
         }
+        composable(
+            route = Route.doctorHome
+        ){
+            TODO()
+        }
     }
 }
 

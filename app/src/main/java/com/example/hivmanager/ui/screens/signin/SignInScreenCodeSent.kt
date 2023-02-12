@@ -56,7 +56,8 @@ fun SignInScreenCodeSent(
         onChangePhoneNumberClick = {viewModel.onEvent(SignInEvent.OnChangePhoneNumberClick)},
         codeFieldValue = viewModel.state.code,
         onCodeFieldValueChange = {viewModel.onEvent(SignInEvent.OnCodeChange(it))},
-        isCodeError = viewModel.state.isCodeError
+        isCodeError = viewModel.state.isCodeError,
+        timerSeconds = viewModel.state.timerSeconds
     )
 }
 
@@ -90,7 +91,7 @@ fun SignInScreenCodeSentUi(
         )
         Text(
             text = buildAnnotatedString {
-                append("We have sent a verification code to ")
+                append("Мы отправили код на номер ")
                 withStyle(
                     style = SpanStyle(
                         textDecoration = TextDecoration.Underline
@@ -112,9 +113,9 @@ fun SignInScreenCodeSentUi(
         SignInTextField(
             value = codeFieldValue,
             onValueChange = onCodeFieldValueChange,
-            label = { Text(text = "Code") },
+            label = { Text(text = "Код подтверждения") },
             modifier = Modifier.constrainAs(codeField) {
-                top.linkTo(parent.top, 25.dp)
+                top.linkTo(parent.top, 70.dp)
                 bottom.linkTo(parent.bottom)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
@@ -134,7 +135,7 @@ fun SignInScreenCodeSentUi(
                 }
         ) {
             Text(
-                text = "Sign In"
+                text = "Войти"
             )
         }
         Column(
@@ -148,13 +149,13 @@ fun SignInScreenCodeSentUi(
         ) {
             val text =
                 if (timerSeconds == 0)
-                    "Resend code"
+                    "Отправить снова"
                 else {
                     when (timerSeconds) {
-                        60 -> "Resend code(1:00)"
-                        in 10..59 -> "Resend code(0:${timerSeconds})"
-                        in 1..9 -> "Resend code(0:0${timerSeconds})"
-                        else -> "Resend code"
+                        60 -> "Отправить снова(1:00)"
+                        in 10..59 -> "Отправить снова(0:${timerSeconds})"
+                        in 1..9 -> "Отправить снова(0:0${timerSeconds})"
+                        else -> "Отправить снова"
                     }
 
                 }
@@ -166,13 +167,13 @@ fun SignInScreenCodeSentUi(
             )
             Spacer(modifier = Modifier.height(5.dp))
             Text(
-                text = " OR ",
+                text = " ИЛИ ",
             )
             Spacer(modifier = Modifier.height(5.dp))
             Text(
                 modifier = Modifier
                     .clickable { onChangePhoneNumberClick() },
-                text = "Change phone number",
+                text = "Ввести другой номер",
                 textDecoration = TextDecoration.Underline,
             )
         }

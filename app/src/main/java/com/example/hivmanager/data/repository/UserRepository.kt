@@ -7,6 +7,7 @@ import androidx.datastore.dataStore
 import com.example.hivmanager.data.model.*
 import com.example.hivmanager.ui.screens.chat.Message
 import com.google.firebase.auth.*
+import com.google.firebase.auth.PhoneAuthProvider.ForceResendingToken
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -61,13 +62,15 @@ class UserRepository @Inject constructor(
     fun sendVerificationCode(
         phoneNumber:String,
         callbacks :PhoneAuthProvider.OnVerificationStateChangedCallbacks,
-        activity: Activity
+        activity: Activity,
+        resendToken:ForceResendingToken? = null
     ){
         val options = PhoneAuthOptions.newBuilder(auth)
             .setPhoneNumber(phoneNumber)       // Phone number to verify
             .setTimeout(60L, TimeUnit.SECONDS) // Timeout and unit
             .setActivity(activity)
             .setCallbacks(callbacks)
+            .let { if (resendToken!=null) it.setForceResendingToken(resendToken) else it }
             .build()
         PhoneAuthProvider.verifyPhoneNumber(options)
     }

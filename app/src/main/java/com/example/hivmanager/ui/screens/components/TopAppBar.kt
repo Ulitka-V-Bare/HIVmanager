@@ -19,9 +19,10 @@ import com.example.hivmanager.R
 
 @Preview
 @Composable
-fun MyTopAppBar(header:String = "Header") {
+fun MyTopAppBar(header:String = "Header", modifier: Modifier = Modifier) {
     TopAppBar(
-        backgroundColor = MaterialTheme.colors.background
+        backgroundColor = MaterialTheme.colors.background,
+        modifier = modifier
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (image, text) = createRefs()

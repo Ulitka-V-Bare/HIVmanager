@@ -71,7 +71,7 @@ private fun MyPillsScreenUi(
 ){
 
     Scaffold(
-        topBar = { MyTopAppBar("My pills") },
+        topBar = { MyTopAppBar("Мои напоминания") },
         bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender,0) },
         floatingActionButton = { MyFloatingActionButton(onClick = onAddNewPillClick)}
     ) {

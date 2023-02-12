@@ -56,7 +56,7 @@ private fun InfoScreenUi(
 ) {
     val articles = Articles
     Scaffold(
-        topBar = { MyTopAppBar("Info") },
+        topBar = { MyTopAppBar("Справка") },
         bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender, 0) }
     ) {
         Column(

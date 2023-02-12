@@ -31,6 +31,7 @@ class SplashViewModel @Inject constructor(
     private fun onSplashScreenLaunched(){
         viewModelScope.launch{
             delay(500)
+          //  auth.signOut()
             userRepository.loadPillInfoList(viewModelScope)
 
             try{

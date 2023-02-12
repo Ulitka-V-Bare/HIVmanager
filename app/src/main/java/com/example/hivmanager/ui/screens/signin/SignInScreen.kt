@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -86,19 +87,22 @@ private fun SignInScreenUi(
             contentDescription = "Big logo"
         )
         Text(
-            text = "Enter your phone number",
+            text = "Введите ваш номер телефона, мы отправим на него СМС с кодом для входа в аккаунт",
             modifier = Modifier.constrainAs(textField) {
                 bottom.linkTo(phoneField.top, 5.dp)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            },
+                start.linkTo(parent.start,40.dp)
+                end.linkTo(parent.end,40.dp)
+            }.width(230.dp),
+            style = TextStyle(
+                textAlign = TextAlign.Center
+            )
         )
         SignInTextField(
             value = phoneFieldValue,
             onValueChange = onPhoneFieldValueChange,
-            label = { Text(text = "Phone number") },
+            label = { Text(text = "Номер телефона") },
             modifier = Modifier.constrainAs(phoneField) {
-                top.linkTo(parent.top, 25.dp)
+                top.linkTo(parent.top, 70.dp)
                 bottom.linkTo(parent.bottom)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
@@ -118,13 +122,13 @@ private fun SignInScreenUi(
         ) {
             val text =
                 if (timerSeconds == 0)
-                    "Send code"
+                    "Отправить код"
                 else {
                     when (timerSeconds) {
-                        60 -> "Send code(1:00)"
-                        in 10..59 -> "Send code(0:${timerSeconds})"
-                        in 1..9 -> "Send code(0:0${timerSeconds})"
-                        else -> "Send code"
+                        60 -> "Отправить код(1:00)"
+                        in 10..59 -> "Отправить код(0:${timerSeconds})"
+                        in 1..9 -> "Отправить код(0:0${timerSeconds})"
+                        else -> "Отправить код"
                     }
 
                 }

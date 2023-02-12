@@ -46,7 +46,7 @@ private fun HomeScreenUi(
     onOpenPillListClick:()->Unit={}
 ){
     Scaffold(
-        topBar = {MyTopAppBar("Home")},
+        topBar = {MyTopAppBar("Главная")},
         bottomBar = {BottomNavBar(bottomNavBarNavigationEventSender,1)}
     ) {
         Column(modifier = Modifier.padding(it)) {

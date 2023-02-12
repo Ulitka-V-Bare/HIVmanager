@@ -1,6 +1,9 @@
 package com.example.hivmanager.di
 
 import android.content.Context
+import com.example.hivmanager.data.model.notification.AlarmReceiver
+import com.example.hivmanager.data.model.notification.AlarmScheduler
+import com.example.hivmanager.data.model.notification.AndroidAlarmScheduler
 import com.example.hivmanager.data.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthOptions
@@ -39,5 +42,12 @@ object AppModule {
         context: Context,
         database:FirebaseDatabase
     ):UserRepository = UserRepository(auth,firestore,context,database)
+
+    @Singleton
+    @Provides
+    fun provideScheduler(
+        @ApplicationContext
+        context: Context,
+    ):AlarmScheduler = AndroidAlarmScheduler(context)
 
 }

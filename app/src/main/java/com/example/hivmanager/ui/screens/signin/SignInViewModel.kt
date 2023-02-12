@@ -44,6 +44,7 @@ class SignInViewModel @Inject constructor(
         private set
 
     var storedVerificationId:String = ""
+    var resendToken: PhoneAuthProvider.ForceResendingToken? = null
 
     private val timer = object : CountDownTimer(60000, 1000){
         override fun onTick(millisUntilFinished: Long) {
@@ -92,7 +93,7 @@ class SignInViewModel @Inject constructor(
     }
 
     private fun onSendCodeButtonClick(activity: Activity){
-        var resendToken: PhoneAuthProvider.ForceResendingToken? = null
+
         val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 
             override fun onVerificationCompleted(credential: PhoneAuthCredential) {
@@ -148,7 +149,7 @@ class SignInViewModel @Inject constructor(
         }
 
         //userRepository.sendVerificationCode(state.phoneNumber,callbacks)
-        userRepository.sendVerificationCode("+${state.phoneNumber}",callbacks,activity)
+        userRepository.sendVerificationCode("+${state.phoneNumber}",callbacks,activity, resendToken)
 
     }
 

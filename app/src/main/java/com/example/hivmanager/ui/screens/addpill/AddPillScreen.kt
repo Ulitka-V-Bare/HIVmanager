@@ -1,7 +1,9 @@
 package com.example.hivmanager.ui.screens.addpill
 
+import android.app.Activity
 import android.app.TimePickerDialog
 import android.util.Log
+import android.view.WindowManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -42,7 +44,11 @@ fun AddPillScreen(
     onNavigate: (route: String, popBackStack: Boolean) -> Unit,
     viewModel: AddPillViewModel = hiltViewModel()
 ) {
+
+    val activity = (LocalContext.current as Activity)
+
     LaunchedEffect(key1 = true) {
+        activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
         viewModel.uiEvent.collect {
             when (it) {
                 is NavigationEvent.Navigate -> {
@@ -100,7 +106,7 @@ private fun AddPillScreenUi(
     )
 
     Scaffold(
-        topBar = { MyTopAppBar("Info") },
+        topBar = { MyTopAppBar("Добавить напоминание") },
         bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender, 0) },
         floatingActionButton = {
             MyFloatingActionButton(

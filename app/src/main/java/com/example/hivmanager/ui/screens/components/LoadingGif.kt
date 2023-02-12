@@ -1,10 +1,6 @@
 package com.example.hivmanager.ui.screens.components
 
 import android.os.Build.VERSION.SDK_INT
-import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
-import androidx.compose.animation.graphics.res.animatedVectorResource
-import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
-import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,12 +17,11 @@ import coil.request.ImageRequest
 import coil.size.Size
 import com.example.hivmanager.R
 
-@OptIn(ExperimentalAnimationGraphicsApi::class)
 @Composable
 fun LoadingGif(
     modifier: Modifier = Modifier,
-) {
-    val context = LocalContext.current
+    ) {
+        val context = LocalContext.current
     val imageLoader = ImageLoader.Builder(context)
         .components {
             if (SDK_INT >= 28) {

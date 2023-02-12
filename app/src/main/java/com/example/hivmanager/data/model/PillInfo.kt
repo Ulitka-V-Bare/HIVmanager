@@ -11,7 +11,8 @@ data class PillInfo(
     val name: String = "",
     val startDate:String = "19.02.2002",
     val finishDate:String = "22.02.2002",
-    val timeToTakePill: List<String> = listOf()
+    val timeToTakePill: List<String> = listOf(),
+    val duration:Int = 0
 )
 
 val PillInfo_example = PillInfo(

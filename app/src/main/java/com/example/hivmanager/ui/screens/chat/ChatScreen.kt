@@ -1,5 +1,8 @@
 package com.example.hivmanager.ui.screens.chat
 
+import android.app.Activity
+import android.view.Window
+import android.view.WindowManager
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -35,7 +39,11 @@ fun ChatScreen(
     onNavigate: (route: String, popBackStack: Boolean) -> Unit,
     viewModel: ChatViewModel = hiltViewModel()
 ) {
+    val activity = (LocalContext.current as Activity)
+
+
     LaunchedEffect(key1 = true) {
+        activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         viewModel.uiEvent.collect {
             when (it) {
                 is NavigationEvent.Navigate -> {
@@ -73,7 +81,7 @@ private fun ChatScreenUi(
     isLoading:Boolean = false
 ) {
     Scaffold(
-        topBar = { MyTopAppBar("Chat") },
+        topBar = { MyTopAppBar("Чат")},
         bottomBar = {
             Column() {
                 Row(

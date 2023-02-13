@@ -1,8 +1,17 @@
 package com.example.hivmanager.ui.screens.chat
 
 import android.app.Activity
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import android.util.Log
 import android.view.Window
 import android.view.WindowManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,12 +22,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,6 +41,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.hivmanager.navigation.NavigationEvent
 import com.example.hivmanager.ui.screens.components.BottomNavBar
+import com.example.hivmanager.ui.screens.components.ImageContainer
 import com.example.hivmanager.ui.screens.components.LoadingGif
 import com.example.hivmanager.ui.screens.components.MyTopAppBar
 import com.example.hivmanager.ui.screens.info.InfoViewModel
@@ -56,6 +70,25 @@ fun ChatScreen(
             }
         }
     }
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(contract =
+    ActivityResultContracts.GetContent()) { uri: Uri? ->
+        Log.d("photo","launcher entered")
+        viewModel.setImageUri(uri)
+        var bitmap: Bitmap? = null
+        viewModel.state.imageUri?.let {
+            bitmap = if (Build.VERSION.SDK_INT < 28) {
+                MediaStore.Images
+                    .Media.getBitmap(context.contentResolver, it)
+
+            } else {
+                val source = ImageDecoder
+                    .createSource(context.contentResolver, it)
+                ImageDecoder.decodeBitmap(source)
+            }
+        }
+        viewModel.setImageBitmap(bitmap?.asImageBitmap())
+    }
 
 
     if(viewModel.userRepository.userDoctorID!="null" || viewModel.userRepository.userType=="doctor")
@@ -68,7 +101,13 @@ fun ChatScreen(
             userID = viewModel.auth.uid,
             lazyListState = viewModel.lazyColumnScrollState,
             isLoading = viewModel.state.isLoading,
-            isDoctor = isDoctor
+            isDoctor = isDoctor,
+            onAddImageClick = { launcher.launch("image/*") },
+            imageBitmap = viewModel.state.imageBitmap,
+            onDeleteImageClick = {
+                viewModel.setImageBitmap(null)
+                viewModel.setImageUri(null)
+            }
         )
     else{
         ChatNowAvailableUi(bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) })
@@ -110,12 +149,25 @@ private fun ChatScreenUi(
     userID: String? = "",
     lazyListState: LazyListState = rememberLazyListState(),
     isLoading:Boolean = false,
-    isDoctor: Boolean = false
+    isDoctor: Boolean = false,
+    onAddImageClick:()->Unit = {},
+    onDeleteImageClick:()->Unit = {},
+    imageBitmap:ImageBitmap? = null
 ) {
     Scaffold(
         topBar = { MyTopAppBar("Чат")},
         bottomBar = {
             Column() {
+                if(imageBitmap!=null) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(80.dp)
+                    ) {
+                        ImageContainer(imageBitmap = imageBitmap, onCloseClick = onDeleteImageClick,
+                            modifier = Modifier.padding(4.dp).size(76.dp))
+                    }
+                }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -124,6 +176,15 @@ private fun ChatScreenUi(
                         modifier = Modifier.fillMaxWidth(),
                         value = textFieldValue,
                         onValueChange = onTextFieldValueChange,
+                        leadingIcon = {
+                            IconButton(onClick = onAddImageClick) {
+                                Icon(
+                                    imageVector = Icons.Filled.AttachFile,
+                                    contentDescription = "attach image",
+                                    tint = MaterialTheme.colors.primaryVariant
+                                )
+                            }
+                        },
                         trailingIcon = {
                             IconButton(onClick = onSendMessageButtonClick) {
                                 Icon(
@@ -132,7 +193,8 @@ private fun ChatScreenUi(
                                     tint = MaterialTheme.colors.primaryVariant
                                 )
                             }
-                        }
+                        },
+                        placeholder = {Text(text = "Ваше сообщение...")}
                     )
                 }
                 if(!isDoctor) {

@@ -1,9 +1,14 @@
 package com.example.hivmanager.ui.screens.chat
 
+import android.net.Uri
+import androidx.compose.ui.graphics.ImageBitmap
+
 data class ChatState(
     val message:String = "",
     val allMessages:List<Message> = listOf(),
-    val isLoading:Boolean = true
+    val isLoading:Boolean = true,
+    val imageUri:Uri? = null,
+    val imageBitmap: ImageBitmap? = null
 )
 
 data class Message(

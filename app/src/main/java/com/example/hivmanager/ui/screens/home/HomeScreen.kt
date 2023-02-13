@@ -71,6 +71,7 @@ private fun HomeScreenUi(
             Button(onClick = onOpenNotificationChannelSettingsClick) {
                 Text(text = "Notification settings")
             }
+            
         }
     }
 }

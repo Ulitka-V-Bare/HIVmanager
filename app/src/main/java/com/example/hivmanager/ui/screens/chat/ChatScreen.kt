@@ -20,8 +20,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.hivmanager.navigation.NavigationEvent
@@ -37,7 +39,8 @@ import kotlinx.coroutines.NonDisposableHandle.parent
 @Composable
 fun ChatScreen(
     onNavigate: (route: String, popBackStack: Boolean) -> Unit,
-    viewModel: ChatViewModel = hiltViewModel()
+    viewModel: ChatViewModel = hiltViewModel(),
+    isDoctor:Boolean = false
 ) {
     val activity = (LocalContext.current as Activity)
 
@@ -55,17 +58,45 @@ fun ChatScreen(
     }
 
 
+    if(viewModel.userRepository.userDoctorID!="null" || viewModel.userRepository.userType=="doctor")
+        ChatScreenUi(
+            bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) },
+            textFieldValue = viewModel.state.message,
+            onTextFieldValueChange = { viewModel.onEvent(ChatEvent.OnMessageValueChange(it)) },
+            onSendMessageButtonClick = { viewModel.onEvent(ChatEvent.OnSendMessageButtonClick) },
+            messageList = viewModel.state.allMessages,
+            userID = viewModel.auth.uid,
+            lazyListState = viewModel.lazyColumnScrollState,
+            isLoading = viewModel.state.isLoading,
+            isDoctor = isDoctor
+        )
+    else{
+        ChatNowAvailableUi(bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) })
+    }
+}
 
-    ChatScreenUi(
-        bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) },
-        textFieldValue = viewModel.state.message,
-        onTextFieldValueChange = { viewModel.onEvent(ChatEvent.OnMessageValueChange(it)) },
-        onSendMessageButtonClick = { viewModel.onEvent(ChatEvent.OnSendMessageButtonClick) },
-        messageList = viewModel.state.allMessages,
-        userID = viewModel.auth.uid,
-        lazyListState = viewModel.lazyColumnScrollState,
-        isLoading = viewModel.state.isLoading
-    )
+@Composable
+private fun ChatNowAvailableUi(
+    bottomNavBarNavigationEventSender: (NavigationEvent) -> Unit = {},
+){
+    Scaffold(
+        topBar = { MyTopAppBar("Чат")},
+        bottomBar = {
+                BottomNavBar(bottomNavBarNavigationEventSender, 2)
+        }
+    ) {
+        Box(modifier = Modifier
+            .padding(it)
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center) {
+            Text(
+                text = "Мы еще не прикрепили вас ко врачу, обратитесь по адресу",
+                modifier = Modifier.width(200.dp),
+            textAlign = TextAlign.Center,
+                fontSize = 20.sp
+                )
+        }
+    }
 }
 
 
@@ -78,7 +109,8 @@ private fun ChatScreenUi(
     messageList: List<Message> = listOf(),
     userID: String? = "",
     lazyListState: LazyListState = rememberLazyListState(),
-    isLoading:Boolean = false
+    isLoading:Boolean = false,
+    isDoctor: Boolean = false
 ) {
     Scaffold(
         topBar = { MyTopAppBar("Чат")},
@@ -103,8 +135,11 @@ private fun ChatScreenUi(
                         }
                     )
                 }
-                BottomNavBar(bottomNavBarNavigationEventSender, 2)
+                if(!isDoctor) {
+                    BottomNavBar(bottomNavBarNavigationEventSender, 2)
+                }
             }
+
         }
     ) {
         Column(
@@ -164,5 +199,12 @@ private fun ChatScreenUi(
 private fun ChatScreenPreview() {
     HIVmanagerTheme {
         ChatScreenUi()
+    }
+}
+@Preview
+@Composable
+private fun ChatNotAvailablePreview() {
+    HIVmanagerTheme {
+        ChatNowAvailableUi()
     }
 }

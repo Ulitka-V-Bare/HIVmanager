@@ -32,21 +32,15 @@ class ChatViewModel  @Inject constructor(
 
     val lazyColumnScrollState = LazyListState()
 
+    var patientID:String? = null
 
-
+    var chatID = ""
     init {
-//        viewModelScope.launch {
-//            state=state.copy(
-//                allMessages = userRepository.getMessageList("testmessages").sortedBy { it.time }
-//            )
-//        }
         viewModelScope.launch {
-            userRepository.getMessageList("testmessages", { onGetDate(it) })
+            delay(100)
+            chatID = if(patientID==null) "${auth.uid}${userRepository.userDoctorID}" else "${patientID}${auth.uid}"
+            userRepository.getMessageList( chatID,{ onGetDate(it) })
         }
-//        userRepository.setOnUpdateListener(
-//            onChildAddedListener = {getNewMessages(it)},
-//            onLoaded = {changeStateToLoaded()}
-//        )
     }
 
     fun onEvent(event: ChatEvent) {
@@ -63,6 +57,7 @@ class ChatViewModel  @Inject constructor(
         )
         Log.d("ChatViewModel","chat loaded")
         userRepository.setOnUpdateListener(
+            chatID = chatID,
             onChildAddedListener = {getNewMessages(it)},
             onLoaded = {}
         )
@@ -79,7 +74,7 @@ class ChatViewModel  @Inject constructor(
         }
     }
     private fun onSendMessageButtonClick(){
-        userRepository.sendMessage(state.message)
+        userRepository.sendMessage(chatID,state.message)
         state=state.copy(message = "")
     }
 

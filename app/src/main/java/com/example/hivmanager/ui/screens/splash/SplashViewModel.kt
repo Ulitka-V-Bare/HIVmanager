@@ -32,7 +32,7 @@ class SplashViewModel @Inject constructor(
         viewModelScope.launch{
             delay(500)
           //  auth.signOut()
-            userRepository.loadPillInfoList(viewModelScope)
+            userRepository.loadUserLocalData(viewModelScope)
 
 
             try{

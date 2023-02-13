@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.hivmanager.R
 import com.example.hivmanager.navigation.NavigationEvent
 import com.example.hivmanager.ui.screens.components.BottomNavBar
 import com.example.hivmanager.ui.screens.components.ImageContainer
@@ -107,7 +108,8 @@ fun ChatScreen(
             onDeleteImageClick = {
                 viewModel.setImageBitmap(null)
                 viewModel.setImageUri(null)
-            }
+            },
+            images = viewModel.state.images
         )
     else{
         ChatNowAvailableUi(bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) })
@@ -152,7 +154,8 @@ private fun ChatScreenUi(
     isDoctor: Boolean = false,
     onAddImageClick:()->Unit = {},
     onDeleteImageClick:()->Unit = {},
-    imageBitmap:ImageBitmap? = null
+    imageBitmap:ImageBitmap? = null,
+    images:Map<String,ImageBitmap?> = mapOf()
 ) {
     Scaffold(
         topBar = { MyTopAppBar("Чат")},
@@ -165,7 +168,9 @@ private fun ChatScreenUi(
                             .height(80.dp)
                     ) {
                         ImageContainer(imageBitmap = imageBitmap, onCloseClick = onDeleteImageClick,
-                            modifier = Modifier.padding(4.dp).size(76.dp))
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .size(76.dp))
                     }
                 }
                 Row(
@@ -236,14 +241,25 @@ private fun ChatScreenUi(
                                 shape = RoundedCornerShape(5.dp),
 
                                 ) {
-                                Text(
-                                    text = message.text,
-                                    modifier = Modifier.padding(
-                                        vertical = 8.dp,
-                                        horizontal = 10.dp
-                                    ),
-                                    color = if (isSystemInDarkTheme()) White500 else White200
-                                )
+                                Column() {
+                                    Text(
+                                        text = message.text,
+                                        modifier = Modifier.padding(
+                                            vertical = 8.dp,
+                                            horizontal = 10.dp
+                                        ),
+                                        color = if (isSystemInDarkTheme()) White500 else White200
+                                    )
+                                    if(message.imageBitmap.isNotEmpty()){
+                                        if(images[message.imageBitmap]!=null)
+                                            ImageContainer(
+                                                imageBitmap = images[message.imageBitmap]!!,
+                                            )
+                                        else
+                                            ImageContainer(painterResource = R.drawable.grey_background)
+                                    }
+                                }
+
                             }
                         }
                     }

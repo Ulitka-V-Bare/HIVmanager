@@ -2,7 +2,9 @@ package com.example.hivmanager.data.repository
 
 import android.app.Activity
 import android.content.Context
+import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.datastore.dataStore
 import androidx.lifecycle.viewModelScope
 import com.example.hivmanager.data.model.*
@@ -16,6 +18,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
@@ -167,19 +170,23 @@ class UserRepository @Inject constructor(
     }
 
 
-    fun sendMessage(chatID:String, message:String){
+    fun sendMessage(chatID:String, message:String, imageUri:Uri?){
 //        val ref = database.getReference("messages").child(chatID).child("${com.google.firebase.Timestamp.now()}")
 //        ref.updateChildren(mapOf(
 //            "message" to message,
 //            "time" to "${com.google.firebase.Timestamp.now().seconds}",
 //            "author" to "${auth.uid}"
 //        ))
-        val ref = database.getReference("messages").child(chatID).push( )
-        ref.updateChildren(mapOf(
-            "message" to message,
-            "time" to "${com.google.firebase.Timestamp.now().seconds}",
-            "author" to "${auth.uid}"
-        ))
+        val ref = database.getReference("messages").child(chatID).push()
+        ref.updateChildren(
+            mapOf(
+                "message" to message,
+                "time" to "${com.google.firebase.Timestamp.now().seconds}",
+                "author" to "${auth.uid}",
+                "image" to if (imageUri == null) "" else "images/${chatID}/${ref.key!!}"
+            )
+        )
+        uploadImage(imageUri, chatID, ref.key!!)
     }
 
     fun setOnUpdateListener(chatID:String, onChildAddedListener: (DataSnapshot)->Unit,onLoaded:()->Unit){
@@ -220,13 +227,15 @@ class UserRepository @Inject constructor(
                         val iterator = child.children.iterator()
                         while (iterator.hasNext()){
                             val senderID = iterator.next().value
+                            val image = iterator.next().value
                             val message = iterator.next().value
                             val time = iterator.next().value
                             messageList.add(
                                 Message(
                                     senderID.toString(),
                                     message.toString(),
-                                    time.toString().toLong()
+                                    time.toString().toLong(),
+                                    image.toString()
                                 )
                             )
                         }
@@ -241,4 +250,11 @@ class UserRepository @Inject constructor(
             }
         )
     }
+
+    private fun uploadImage(uri: Uri?,chatID:String,messageID:String) {
+        val imageRef = FirebaseStorage.getInstance().getReference("images/${chatID}/${messageID}")
+        if(uri!=null)
+            imageRef.putFile(uri)
+    }
+
 }

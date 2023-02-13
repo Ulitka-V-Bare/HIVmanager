@@ -8,11 +8,13 @@ data class ChatState(
     val allMessages:List<Message> = listOf(),
     val isLoading:Boolean = true,
     val imageUri:Uri? = null,
-    val imageBitmap: ImageBitmap? = null
+    val imageBitmap: ImageBitmap? = null,
+    val images: Map<String,ImageBitmap?> = mapOf()
 )
 
 data class Message(
     val sender:String,
     val text:String,
-    val time:Long
+    val time:Long,
+    val imageBitmap: String
 )

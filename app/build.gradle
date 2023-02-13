@@ -75,6 +75,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation 'com.google.firebase:firebase-firestore-ktx'
     implementation 'com.google.firebase:firebase-database-ktx:20.1.0'
+    implementation 'com.google.firebase:firebase-storage-ktx:20.1.0'
 
     //constraint layout
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"

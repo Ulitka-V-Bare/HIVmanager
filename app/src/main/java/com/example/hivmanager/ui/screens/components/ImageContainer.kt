@@ -12,7 +12,9 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 
@@ -39,10 +41,50 @@ fun ImageContainer(
                 contentDescription = "image",
                 contentScale = ContentScale.Crop,
             )
-            IconButton(onClick = onCloseClick, modifier = Modifier.size(18.dp).constrainAs(closeButton){
-                top.linkTo(parent.top,8.dp)
-                end.linkTo(parent.end,8.dp)
-            }) {
+            IconButton(onClick = onCloseClick, modifier = Modifier
+                .size(18.dp)
+                .constrainAs(closeButton) {
+                    top.linkTo(parent.top, 8.dp)
+                    end.linkTo(parent.end, 8.dp)
+                }) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "delete image button"
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ImageContainer(
+    painterResource: Int,
+    onCloseClick:()->Unit = {},
+    modifier: Modifier = Modifier
+){
+    Surface(
+        modifier = modifier,
+        elevation = 4.dp
+    ) {
+        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+            val(image,closeButton) = createRefs()
+            Image(
+                modifier = Modifier.constrainAs(image){
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+                painter = painterResource(id = painterResource),
+                contentDescription = "image",
+                contentScale = ContentScale.Crop,
+            )
+            IconButton(onClick = onCloseClick, modifier = Modifier
+                .size(18.dp)
+                .constrainAs(closeButton) {
+                    top.linkTo(parent.top, 8.dp)
+                    end.linkTo(parent.end, 8.dp)
+                }) {
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = "delete image button"

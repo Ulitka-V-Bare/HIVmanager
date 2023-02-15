@@ -92,7 +92,7 @@ fun ChatScreen(
     }
 
 
-    if(viewModel.userRepository.userDoctorID!="null" || viewModel.userRepository.userType=="doctor")
+    if(viewModel.userRepository.userDoctorID!="null" || viewModel.userRepository.userType=="doctor" || viewModel.userRepository.userDoctorID.isNotEmpty())
         ChatScreenUi(
             bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) },
             textFieldValue = viewModel.state.message,
@@ -109,7 +109,8 @@ fun ChatScreen(
                 viewModel.setImageBitmap(null)
                 viewModel.setImageUri(null)
             },
-            images = viewModel.state.images
+            images = viewModel.state.images,
+            onSaveImageClick = {image,name->viewModel.saveMediaToStorage(image,name)}
         )
     else{
         ChatNowAvailableUi(bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) })
@@ -155,7 +156,8 @@ private fun ChatScreenUi(
     onAddImageClick:()->Unit = {},
     onDeleteImageClick:()->Unit = {},
     imageBitmap:ImageBitmap? = null,
-    images:Map<String,ImageBitmap?> = mapOf()
+    images:Map<String,ImageBitmap?> = mapOf(),
+    onSaveImageClick:(Bitmap,String)->Unit = {_,_->}
 ) {
     Scaffold(
         topBar = { MyTopAppBar("Чат")},
@@ -254,9 +256,11 @@ private fun ChatScreenUi(
                                         if(images[message.imageBitmap]!=null)
                                             ImageContainer(
                                                 imageBitmap = images[message.imageBitmap]!!,
+                                                modifier = Modifier.width(270.dp).heightIn(max = 350.dp),
+                                                onSaveClick = {bitmap -> onSaveImageClick(bitmap,message.imageBitmap.substringAfterLast('/'))}
                                             )
                                         else
-                                            ImageContainer(painterResource = R.drawable.grey_background)
+                                            ImageContainer(painterResource = R.drawable.grey_background, modifier = Modifier.width(270.dp).height(270.dp))
                                     }
                                 }
 

@@ -107,7 +107,7 @@ private fun AddPillScreenUi(
 
     Scaffold(
         topBar = { MyTopAppBar("Добавить напоминание") },
-        bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender, 0) },
+        bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender) },
         floatingActionButton = {
             MyFloatingActionButton(
                 imageVector = Icons.Filled.Done,

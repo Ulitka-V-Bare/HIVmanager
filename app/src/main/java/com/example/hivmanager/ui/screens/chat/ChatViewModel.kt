@@ -1,7 +1,14 @@
 package com.example.hivmanager.ui.screens.chat
 
+import android.content.ContentValues
+import android.content.Context
+import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyListState
@@ -13,17 +20,22 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.hivmanager.R
 import com.example.hivmanager.data.repository.UserRepository
 import com.example.hivmanager.navigation.NavigationEvent
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import javax.inject.Inject
 
 val ONE_MEGABYTE: Long = 1024 * 1024
@@ -31,7 +43,8 @@ val ONE_MEGABYTE: Long = 1024 * 1024
 class ChatViewModel  @Inject constructor(
     val auth: FirebaseAuth,
     val userRepository: UserRepository,
-
+    @ApplicationContext
+    val context: Context
     ): ViewModel() {
 
     var state by mutableStateOf(ChatState())
@@ -50,14 +63,6 @@ class ChatViewModel  @Inject constructor(
             delay(100)
             chatID = if(patientID==null) "${auth.uid}${userRepository.userDoctorID}" else "${patientID}${auth.uid}"
             userRepository.getMessageList( chatID,{ onGetDate(it) })
-            sendStatus()
-        }
-    }
-
-    suspend fun sendStatus(){
-        while (true) {
-            delay(5000)
-            Log.d("ChatViewModel", "${state.images}")
         }
     }
 
@@ -114,19 +119,15 @@ class ChatViewModel  @Inject constructor(
                 return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size).asImageBitmap()
             }catch (e:Exception){
                 Log.d("ChatViewModel","${e.message}")
-                return null
+                return BitmapFactory.decodeResource(context.resources, R.drawable.image_not_available).asImageBitmap()
             }
         }catch (e:Exception){
-            return null
+            return BitmapFactory.decodeResource(context.resources, R.drawable.image_not_available).asImageBitmap()
         }
-
-
-
     }
 
 
     private fun changeStateToLoaded(){
-
         if(state.isLoading){
             state=state.copy(
                 allMessages = state.allMessages.sortedBy { it.time },
@@ -136,8 +137,10 @@ class ChatViewModel  @Inject constructor(
         }
     }
     private fun onSendMessageButtonClick(){
-        userRepository.sendMessage(chatID,state.message,state.imageUri)
-        state=state.copy(message = "", imageBitmap = null, imageUri = null)
+        if(state.message.isNotEmpty()||state.imageUri!=null) {
+            userRepository.sendMessage(chatID, state.message, state.imageUri)
+            state = state.copy(message = "", imageBitmap = null, imageUri = null)
+        }
     }
 
     private fun onMessageValueChange(message:String){
@@ -148,6 +151,51 @@ class ChatViewModel  @Inject constructor(
     fun sendNavigationEvent(event: NavigationEvent){
         viewModelScope.launch {
             _navigationEvent.send(event)
+        }
+    }
+
+    fun saveMediaToStorage(bitmap: Bitmap,imageName:String) {
+        Log.d("ChatViewModel","")
+        //Generating a file name
+        val filename = "$imageName.png"
+
+        //Output stream
+        var fos: OutputStream? = null
+
+        //For devices running android >= Q
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            //getting the contentResolver
+            context?.contentResolver?.also { resolver ->
+
+                //Content resolver will process the contentvalues
+                val contentValues = ContentValues().apply {
+
+                    //putting file information in content values
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+                }
+
+                //Inserting the contentValues to contentResolver and getting the Uri
+                val imageUri: Uri? =
+                    resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+                //Opening an outputstream with the Uri that we got
+                fos = imageUri?.let { resolver.openOutputStream(it) }
+            }
+        } else {
+            //These for devices running on android < Q
+            //So I don't think an explanation is needed here
+            val imagesDir =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+            val image = File(imagesDir, filename)
+            fos = FileOutputStream(image)
+        }
+
+        fos?.use {
+            //Finally writing the bitmap to the output stream that we opened
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+            Toast.makeText(context,"Изображение сохранено",Toast.LENGTH_SHORT).show()
         }
     }
 

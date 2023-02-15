@@ -72,7 +72,7 @@ private fun MyPillsScreenUi(
 
     Scaffold(
         topBar = { MyTopAppBar("Мои напоминания") },
-        bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender,0) },
+        bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender) },
         floatingActionButton = { MyFloatingActionButton(onClick = onAddNewPillClick)}
     ) {
 

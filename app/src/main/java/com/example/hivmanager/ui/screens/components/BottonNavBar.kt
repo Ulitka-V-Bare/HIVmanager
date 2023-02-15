@@ -24,7 +24,7 @@ import com.example.hivmanager.navigation.Route
 @Composable
 fun BottomNavBar(
     navigationEventSender: (NavigationEvent)->Unit = {},
-    selected:Int = 0
+    selected:Int = 999
 ){
     var selectedItem by remember { mutableStateOf(selected) }
     val items = listOf("Info", "Home", "Chat")

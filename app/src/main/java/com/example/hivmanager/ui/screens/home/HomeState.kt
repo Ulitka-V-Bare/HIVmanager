@@ -1,5 +1,8 @@
 package com.example.hivmanager.ui.screens.home
 
 data class HomeState(
-    val isNotificationAllowed:Boolean = true
+    val isEditingHeight:Boolean = false,
+    val isEditingAllergies:Boolean = false,
+    val height:Int = 0,
+    val allergies: String = "",
 )

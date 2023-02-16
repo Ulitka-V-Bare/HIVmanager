@@ -28,8 +28,6 @@ class HomeViewModel  @Inject constructor(
     private val _navigationEvent = Channel<NavigationEvent>()
     val uiEvent = _navigationEvent.receiveAsFlow()
 
-    var state by mutableStateOf(HomeState())
-        private set
 
     fun onEvent(event: HomeEvent) {
         when (event) {
@@ -41,15 +39,21 @@ class HomeViewModel  @Inject constructor(
 
 
     private fun onConfirmEditHeightClick(height:String){
-        state = state.copy(
-            height = if(height.isEmpty()) 0 else height.toInt()
-        )
+//        state = state.copy(
+//            height = if(height.isEmpty()) 0 else height.toInt()
+//        )
+        viewModelScope.launch {
+            userRepository.setHeight(if(height.isEmpty()) 0 else height.toInt())
+        }
     }
 
     private fun onConfirmEditAllergiesClick(allergies:String){
-        state = state.copy(
-            allergies = allergies
-        )
+//        state = state.copy(
+//            allergies = allergies
+//        )
+        viewModelScope.launch {
+            userRepository.setAllergies(allergies)
+        }
     }
     fun sendNavigationEvent(event:NavigationEvent){
         viewModelScope.launch {

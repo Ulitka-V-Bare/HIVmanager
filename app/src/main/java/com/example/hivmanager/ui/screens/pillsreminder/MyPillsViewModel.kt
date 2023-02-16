@@ -46,7 +46,7 @@ class MyPillsViewModel @Inject constructor(
     private fun onDeletePillInfoClick(index:Int){
         viewModelScope.launch {
             Log.d("cancelPill","before cancelNotification")
-            cancelNotifications(userRepository.userData.pillInfoList[index])
+            cancelNotifications(userRepository.loadUserLocalData().pillInfoList[index])
             Log.d("cancelPill","before deletePillInfo")
             userRepository.deletePillInfo(index)
         }

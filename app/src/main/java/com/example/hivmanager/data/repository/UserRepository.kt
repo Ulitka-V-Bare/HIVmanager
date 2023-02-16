@@ -44,14 +44,13 @@ class UserRepository @Inject constructor(
     val context: Context,
     private val database:FirebaseDatabase
 ){
-    var userData: UserData = UserData()
     var userType: String = ""
     var userDoctorID: String = ""
     var patientList:MutableList<String> = mutableListOf()
     var userDataFlow: Flow<UserData> = context.dataStore.data
-    suspend fun loadUserLocalData(scope:CoroutineScope){
+    suspend fun loadUserLocalData():UserData{
         try {
-            userData = context.dataStore.data.first()
+            return context.dataStore.data.first()
         }catch (e:Exception){
             Log.d("UserRepository","${e.message}")
         }
@@ -66,8 +65,8 @@ class UserRepository @Inject constructor(
         }catch (e:Exception){
             Log.d("UserRepository","${e.message}")
         }
+        return UserData()
     }
-
     suspend fun loadUserData(uid: String){
         val result = firestore.collection(Constants.USERS).document(uid).get().await()
         userType = result.get("type").toString()
@@ -161,42 +160,63 @@ class UserRepository @Inject constructor(
             .build()
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
+    suspend fun updateUserDataOnDatabase(){
+        try {
+            firestore.collection("users").document(auth.uid!!).update(
+                mapOf("data" to context.dataStore.data.first()),
+                //  SetOptions.merge()
+            )
+        }catch (e:Exception){
 
+        }
+    }
     suspend fun deletePillInfo(index:Int){
         context.dataStore.updateData {
             it.copy(pillInfoList = it.pillInfoList.minus(it.pillInfoList[index]))
         }
-        userData = userData.copy(pillInfoList = userData.pillInfoList.minus(userData.pillInfoList[index]))
+        updateUserDataOnDatabase()
+      //  userData = userData.copy(pillInfoList = userData.pillInfoList.minus(userData.pillInfoList[index]))
     }
+
 
     suspend fun addPillInfo(pillInfo: PillInfo){
         context.dataStore.updateData {
             it.copy(pillInfoList = it.pillInfoList.plus(pillInfo))
         }
-        userData = userData.copy(pillInfoList = userData.pillInfoList.plus(pillInfo))
-        try {
-            firestore.collection("users").document(auth.uid!!).update(
-                mapOf("data" to context.dataStore.data.first()),
-              //  SetOptions.merge()
-            )
-        }catch (e:Exception){
+        updateUserDataOnDatabase()
+      //  userData = userData.copy(pillInfoList = userData.pillInfoList.plus(pillInfo))
 
-        }
     }
 
     suspend fun addDiaryEntry(diaryEntry: DiaryEntry){
         context.dataStore.updateData {
             it.copy(diaryEntries = listOf(diaryEntry).plus(it.diaryEntries))
         }
-        userData = userData.copy(diaryEntries = userData.diaryEntries.plus(diaryEntry))
-
+        updateUserDataOnDatabase()
+       //userData = userData.copy(diaryEntries = userData.diaryEntries.plus(diaryEntry))
     }
     suspend fun deleteDiaryEntry(diaryEntry: DiaryEntry){
         context.dataStore.updateData {
             it.copy(diaryEntries = it.diaryEntries.minus(diaryEntry))
         }
-        userData = userData.copy(diaryEntries = userData.diaryEntries.minus(diaryEntry))
+        updateUserDataOnDatabase()
+       // userData = userData.copy(diaryEntries = userData.diaryEntries.minus(diaryEntry))
     }
+
+    suspend fun setHeight(height:Int){
+        context.dataStore.updateData {
+            it.copy(height = height)
+        }
+        updateUserDataOnDatabase()
+    }
+
+    suspend fun setAllergies(allergies:String){
+        context.dataStore.updateData {
+            it.copy(allergies = allergies)
+        }
+        updateUserDataOnDatabase()
+    }
+
 
 
     fun sendMessage(chatID:String, message:String, imageUri:Uri?){

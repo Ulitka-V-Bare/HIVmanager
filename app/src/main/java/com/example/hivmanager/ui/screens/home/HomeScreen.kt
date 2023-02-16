@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.hivmanager.data.model.Constants
+import com.example.hivmanager.data.model.UserData
 import com.example.hivmanager.navigation.NavigationEvent
 import com.example.hivmanager.navigation.Route
 import com.example.hivmanager.ui.screens.components.BottomNavBar
@@ -48,6 +49,9 @@ fun HomeScreen(
         //    .putExtra(Settings.EXTRA_CHANNEL_ID, Constants.CHANNEL_ID)
         context.startActivity(intent)
     }
+
+    val state = viewModel.userRepository.userDataFlow.collectAsState(initial = UserData()).value
+
     HomeScreenUi(
         bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) },
         onOpenPillListClick = { viewModel.sendNavigationEvent(NavigationEvent.Navigate(Route.pillReminder)) },
@@ -55,8 +59,8 @@ fun HomeScreen(
         onOpenDiaryClick = {viewModel.sendNavigationEvent(NavigationEvent.Navigate(Route.diary))},
         onConfirmEditHeightClick = {viewModel.onEvent(HomeEvent.OnConfirmEditHeightClick(it))},
         onConfirmEditAllergiesClick = {viewModel.onEvent(HomeEvent.OnConfirmEditAllergiesClick(it))},
-        userHeight = viewModel.state.height,
-        userAllergies = viewModel.state.allergies
+        userHeight = state.height,
+        userAllergies = state.allergies
     )
 }
 
@@ -109,7 +113,7 @@ private fun allergiesContainer(
     ) {
         var isEditingHeight by remember { mutableStateOf(false) }
         Text(
-            text = "Мой рост: ",
+            text = "Мои аллергии: ",
         )
         if (!isEditingHeight) {
             Text(

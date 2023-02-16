@@ -42,7 +42,8 @@ class SplashViewModel @Inject constructor(
                 auth.signOut()
             }
             Log.d("splash","before loadUserLocalData")
-            userRepository.loadUserLocalData(viewModelScope)
+            userRepository.loadUserLocalData()
+            userRepository.updateUserDataOnDatabase()
             Log.d("splash","after loadUserLocalData")
                 //load data into UserRepository
             if(auth.currentUser==null){

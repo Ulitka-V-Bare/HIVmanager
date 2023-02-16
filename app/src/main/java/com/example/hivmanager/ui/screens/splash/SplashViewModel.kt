@@ -1,5 +1,6 @@
 package com.example.hivmanager.ui.screens.splash
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hivmanager.data.repository.UserRepository
@@ -12,6 +13,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,7 +34,6 @@ class SplashViewModel @Inject constructor(
         viewModelScope.launch{
             delay(500)
           //  auth.signOut()
-            userRepository.loadUserLocalData(viewModelScope)
 
 
             try{
@@ -40,6 +41,9 @@ class SplashViewModel @Inject constructor(
             }catch (e:FirebaseAuthInvalidUserException){
                 auth.signOut()
             }
+            Log.d("splash","before loadUserLocalData")
+            userRepository.loadUserLocalData(viewModelScope)
+            Log.d("splash","after loadUserLocalData")
                 //load data into UserRepository
             if(auth.currentUser==null){
                 _navigationEvent.send(NavigationEvent.Navigate(Route.signIn,))

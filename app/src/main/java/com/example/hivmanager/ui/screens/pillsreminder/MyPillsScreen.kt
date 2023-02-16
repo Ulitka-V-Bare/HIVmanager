@@ -52,7 +52,7 @@ fun MyPillsScreen(
             }
         }
     }
-    val pillInfoList = viewModel.userRepository.context.dataStore.data.collectAsState(initial = UserData()).value
+    val pillInfoList = viewModel.userRepository.userDataFlow.collectAsState(initial = UserData()).value
     MyPillsScreenUi(
         bottomNavBarNavigationEventSender = {viewModel.sendNavigationEvent(it)},
         pillList = pillInfoList.pillInfoList,
@@ -102,8 +102,8 @@ fun DeletePillDialog(
             dismissOnClickOutside = true,
         ),
         buttons = {
-            positiveButton(text = "Ok", onClick = onConfirmClick)
-            negativeButton(text = "Cancel")
+            positiveButton(text = "ОК", onClick = onConfirmClick)
+            negativeButton(text = "Отмена")
         }
     ) {
         Text(
@@ -121,7 +121,7 @@ fun MyPillCard(
     onDeletePillClick: () -> Unit = {}
 ){
     Surface(
-        modifier = modifier.padding(8.dp),
+        modifier = modifier.padding(start = 8.dp,end=8.dp,top=8.dp),
         elevation = 4.dp
     ) {
         Row() {

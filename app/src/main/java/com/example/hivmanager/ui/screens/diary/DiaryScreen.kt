@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.runtime.*
@@ -22,17 +23,24 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.hivmanager.data.model.DiaryEntry
+import com.example.hivmanager.data.model.UserData
 import com.example.hivmanager.navigation.NavigationEvent
 import com.example.hivmanager.ui.screens.components.BottomNavBar
 import com.example.hivmanager.ui.screens.components.MyTopAppBar
 import com.example.hivmanager.ui.screens.components.OutlinedTextFieldNoContentPadding
 import com.example.hivmanager.ui.screens.doctorhome.DoctorHomeViewModel
 import com.example.hivmanager.ui.theme.HIVmanagerTheme
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.MaterialDialogState
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import kotlinx.coroutines.flow.asFlow
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -55,10 +63,13 @@ fun DiaryScreen(
             }
         }
     }
-
+    var diaryEntries2 = viewModel.userRepository.userDataFlow.collectAsState(initial = UserData())
 
     DiaryScreenUi(
-        onAddEntryClick = {viewModel.onEvent(DiaryEvent.OnAddDiaryEntryClick(it))}
+        bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) },
+        onAddEntryClick = { viewModel.onEvent(DiaryEvent.OnAddDiaryEntryClick(it)) },
+        diaryList = diaryEntries2.value.diaryEntries,
+        onDeleteEntryClick = { viewModel.onEvent(DiaryEvent.OnDeleteDiaryEntryClick(it)) }
     )
 }
 
@@ -66,6 +77,7 @@ fun DiaryScreen(
 private fun DiaryScreenUi(
     bottomNavBarNavigationEventSender: (NavigationEvent) -> Unit = {},
     onAddEntryClick: (DiaryEntry) -> Unit = {},
+    onDeleteEntryClick: (DiaryEntry) -> Unit = {},
     diaryList: List<DiaryEntry> = listOf(diaryEntryExample)
 ) {
     Scaffold(
@@ -77,10 +89,10 @@ private fun DiaryScreenUi(
                 DiaryHeader()
             }
             item {
-                AddEntry(onAddEntryClick=onAddEntryClick)
+                AddEntry(onAddEntryClick = onAddEntryClick)
             }
             items(diaryList) { diaryEntry ->
-                DiaryEntryContainer(diaryEntry)
+                DiaryEntryContainer(diaryEntry, onDeleteDiaryEntryClick = onDeleteEntryClick)
             }
             item {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -92,11 +104,14 @@ private fun DiaryScreenUi(
 @Composable
 private fun AddEntryTextField(
     value: String,
-    onValueChange:(String)->Unit,
+    onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number,imeAction = ImeAction.Next),
-){
+    keyboardOptions: KeyboardOptions = KeyboardOptions(
+        keyboardType = KeyboardType.Number,
+        imeAction = ImeAction.Next
+    ),
+) {
     OutlinedTextFieldNoContentPadding(
         value = value,
         onValueChange = onValueChange,
@@ -136,7 +151,7 @@ private fun AddEntry(
         mutableStateOf("")
     }
     val focusManager = LocalFocusManager.current
-    val (sysField, diaField, pulseField,tempField,weightField,commentField)= remember { FocusRequester.createRefs() }
+    val (sysField, diaField, pulseField, tempField, weightField, commentField) = remember { FocusRequester.createRefs() }
 
     fun clear() {
         comment = ""
@@ -149,51 +164,61 @@ private fun AddEntry(
     Row(Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.weight(1f)) {
             AddEntryTextField(
-                value = sys, onValueChange = {
+                value = sys,
+                onValueChange = {
                     if (isAllDigits(it) && it.length <= 3)
                         sys = it
                 },
-                modifier = Modifier.focusRequester(sysField)
+                modifier = Modifier
+                    .focusRequester(sysField)
                     .focusProperties { next = diaField },
             )
         }
         Column(modifier = Modifier.weight(1f)) {
             AddEntryTextField(
-                value = dia, onValueChange = {
+                value = dia,
+                onValueChange = {
                     if (isAllDigits(it) && it.length <= 3)
                         dia = it
                 },
-                modifier = Modifier.focusRequester(diaField)
+                modifier = Modifier
+                    .focusRequester(diaField)
                     .focusProperties { next = pulseField },
             )
         }
         Column(modifier = Modifier.weight(1f)) {
             AddEntryTextField(
-                value = pulse, onValueChange = {
+                value = pulse,
+                onValueChange = {
                     if (isAllDigits(it) && it.length <= 3)
                         pulse = it
                 },
-                modifier = Modifier.focusRequester(pulseField)
+                modifier = Modifier
+                    .focusRequester(pulseField)
                     .focusProperties { next = tempField },
             )
         }
         Column(modifier = Modifier.weight(1f)) {
             AddEntryTextField(
-                value = temperature, onValueChange = {
+                value = temperature,
+                onValueChange = {
                     if (isAllDigitsOrDot(it) && it.length <= 4)
                         temperature = it
                 },
-                modifier = Modifier.focusRequester(tempField)
+                modifier = Modifier
+                    .focusRequester(tempField)
                     .focusProperties { next = weightField },
             )
         }
         Column(modifier = Modifier.weight(1f)) {
             AddEntryTextField(
-                value = weight, onValueChange = {
+                value = weight,
+                onValueChange = {
                     if (isAllDigitsOrDot(it) && it.length <= 5)
                         weight = it
                 },
-                modifier = Modifier.focusRequester(weightField)
+                modifier = Modifier
+                    .focusRequester(weightField)
                     .focusProperties { next = commentField },
             )
         }
@@ -202,13 +227,15 @@ private fun AddEntry(
 
         Column(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
-                value = comment, onValueChange = {
-                        comment = it
+                value = comment,
+                onValueChange = {
+                    comment = it
                 },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     unfocusedBorderColor = MaterialTheme.colors.primary,
                     focusedBorderColor = MaterialTheme.colors.primaryVariant
-                ), modifier = Modifier
+                ),
+                modifier = Modifier
                     .padding(horizontal = 4.dp, vertical = 8.dp)
                     .fillMaxWidth()
                     .wrapContentHeight()
@@ -231,12 +258,14 @@ private fun AddEntry(
                 onClick = {
                     onAddEntryClick(
                         DiaryEntry(
-                            upperTension = if(sys.isNotEmpty()) sys.toInt() else 0,
-                            lowerTension = if(dia.isNotEmpty()) dia.toInt() else 0,
-                            pulse = if(pulse.isNotEmpty()) pulse.toInt() else 0,
-                            temperature = if(temperature.isNotEmpty()) temperature.toDouble() else 0.0,
-                            weight = if(weight.isNotEmpty()) weight.toDouble() else 0.0,
-                            comment = comment
+                            upperTension = if (sys.isNotEmpty()) sys.toInt() else 0,
+                            lowerTension = if (dia.isNotEmpty()) dia.toInt() else 0,
+                            pulse = if (pulse.isNotEmpty()) pulse.toInt() else 0,
+                            temperature = if (temperature.isNotEmpty()) temperature.toDouble() else 0.0,
+                            weight = if (weight.isNotEmpty()) weight.toDouble() else 0.0,
+                            comment = comment,
+                            time = LocalDateTime.now()
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
                         )
                     )
                     clear()
@@ -288,15 +317,35 @@ private fun DiaryHeader() {
 @Composable
 private fun DiaryEntryContainer(
     diaryEntry: DiaryEntry = diaryEntryExample,
+    onDeleteDiaryEntryClick: (DiaryEntry) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val deleteEntryDialogState = rememberMaterialDialogState()
+    DeleteEntryDialog(
+        dialogState = deleteEntryDialogState,
+        onConfirmClick = {onDeleteDiaryEntryClick(diaryEntry)}
+    )
     Surface(
         modifier = modifier.padding(8.dp),
         elevation = 6.dp
     ) {
         Column(Modifier.fillMaxWidth()) {
-            Row() {
-                Text(text = "${diaryEntry.time}", fontSize = 20.sp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${diaryEntry.time}",
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+                IconButton(onClick = { deleteEntryDialogState.show() }) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "delete diary entry"
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(Modifier.fillMaxWidth()) {
@@ -361,30 +410,57 @@ private fun DiaryEntryContainer(
 @Composable
 private fun commentHolder(comment: String = "my comment") {
     var isExpanded by remember { mutableStateOf(false) }
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = "Комментарий", modifier = Modifier.padding(start = 8.dp))
-        IconButton(onClick = { isExpanded = !isExpanded }) {
-            Icon(
-                imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                contentDescription = "expend more/less article text",
-                tint = if (isExpanded) MaterialTheme.colors.primaryVariant else LocalContentColor.current.copy(
-                    alpha = LocalContentAlpha.current
+    Column() {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "Комментарий", modifier = Modifier.padding(start = 8.dp))
+            IconButton(onClick = { isExpanded = !isExpanded }) {
+                Icon(
+                    imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    contentDescription = "expend more/less article text",
+                    tint = if (isExpanded) MaterialTheme.colors.primaryVariant else LocalContentColor.current.copy(
+                        alpha = LocalContentAlpha.current
+                    )
                 )
-            )
+            }
+        }
+        AnimatedVisibility(visible = isExpanded) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+
+            ) {
+                Text(text = comment, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
+            }
         }
     }
-    AnimatedVisibility(visible = isExpanded) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Text(text = comment, modifier = Modifier.padding(start = 8.dp))
+}
+
+@Composable
+fun DeleteEntryDialog(
+    dialogState: MaterialDialogState,
+    onConfirmClick: ()->Unit
+){
+    MaterialDialog(
+        dialogState = dialogState,
+        properties = DialogProperties (
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true,
+        ),
+        buttons = {
+            positiveButton(text = "ОК", onClick = onConfirmClick)
+            negativeButton(text = "Отмена")
         }
+    ) {
+        Text(
+            text= "Вы уверены, что хотите удалить запись?",
+            modifier = Modifier.padding(16.dp),
+            textAlign = TextAlign.Center
+        )
     }
 }
 

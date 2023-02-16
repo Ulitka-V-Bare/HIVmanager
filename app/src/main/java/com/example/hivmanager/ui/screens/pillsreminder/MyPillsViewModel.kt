@@ -49,8 +49,6 @@ class MyPillsViewModel @Inject constructor(
             cancelNotifications(userRepository.userData.pillInfoList[index])
             Log.d("cancelPill","before deletePillInfo")
             userRepository.deletePillInfo(index)
-
-
         }
     }
 
@@ -86,10 +84,5 @@ class MyPillsViewModel @Inject constructor(
         viewModelScope.launch {
             _navigationEvent.send(event)
         }
-    }
-
-    fun getPills(): List<PillInfo> {
-        Log.d("MyPillsVM","${userRepository.getUserPills()}")
-        return userRepository.getUserPills()
     }
 }

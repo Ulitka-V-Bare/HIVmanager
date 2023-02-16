@@ -22,7 +22,9 @@ import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope.coroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -30,6 +32,7 @@ import okhttp3.internal.wait
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 
 val Context.dataStore by dataStore("data.json", UserDataSerializer)
@@ -45,9 +48,23 @@ class UserRepository @Inject constructor(
     var userType: String = ""
     var userDoctorID: String = ""
     var patientList:MutableList<String> = mutableListOf()
-    fun loadUserLocalData(scope:CoroutineScope){
-        scope.launch {
+    var userDataFlow: Flow<UserData> = context.dataStore.data
+    suspend fun loadUserLocalData(scope:CoroutineScope){
+        try {
             userData = context.dataStore.data.first()
+        }catch (e:Exception){
+            Log.d("UserRepository","${e.message}")
+        }
+        try {
+           // Log.d("UserRepository","uid = ${auth.uid}")
+          //  val result = firestore.collection("users").document("${auth.uid!!}").get().await()
+          //  userData = constructUserDataFromFirestore(result)
+          //  val onlineUserData: UserData = result.get("data") as UserData
+           // Log.d("UserRepository","${onlineUserData.height}")
+           // Log.d("UserRepository","${result.documents}")
+            //userData = onlineUserData
+        }catch (e:Exception){
+            Log.d("UserRepository","${e.message}")
         }
     }
 
@@ -145,16 +162,6 @@ class UserRepository @Inject constructor(
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
 
-    fun getUserPills(): List<PillInfo> {
-        return userData.pillInfoList
-    }
-
-    suspend fun updatePillsList(pillsList: List<PillInfo>){
-        context.dataStore.updateData {
-            it.copy(pillInfoList =pillsList.toPersistentList())
-        }
-    }
-
     suspend fun deletePillInfo(index:Int){
         context.dataStore.updateData {
             it.copy(pillInfoList = it.pillInfoList.minus(it.pillInfoList[index]))
@@ -167,6 +174,28 @@ class UserRepository @Inject constructor(
             it.copy(pillInfoList = it.pillInfoList.plus(pillInfo))
         }
         userData = userData.copy(pillInfoList = userData.pillInfoList.plus(pillInfo))
+        try {
+            firestore.collection("users").document(auth.uid!!).update(
+                mapOf("data" to context.dataStore.data.first()),
+              //  SetOptions.merge()
+            )
+        }catch (e:Exception){
+
+        }
+    }
+
+    suspend fun addDiaryEntry(diaryEntry: DiaryEntry){
+        context.dataStore.updateData {
+            it.copy(diaryEntries = listOf(diaryEntry).plus(it.diaryEntries))
+        }
+        userData = userData.copy(diaryEntries = userData.diaryEntries.plus(diaryEntry))
+
+    }
+    suspend fun deleteDiaryEntry(diaryEntry: DiaryEntry){
+        context.dataStore.updateData {
+            it.copy(diaryEntries = it.diaryEntries.minus(diaryEntry))
+        }
+        userData = userData.copy(diaryEntries = userData.diaryEntries.minus(diaryEntry))
     }
 
 

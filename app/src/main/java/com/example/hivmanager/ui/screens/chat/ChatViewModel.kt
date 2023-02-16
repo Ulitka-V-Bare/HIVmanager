@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
@@ -23,6 +24,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.hivmanager.R
 import com.example.hivmanager.data.repository.UserRepository
 import com.example.hivmanager.navigation.NavigationEvent
+import com.example.hivmanager.navigation.Route
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.storage.FirebaseStorage
@@ -70,6 +72,7 @@ class ChatViewModel  @Inject constructor(
         when (event) {
             is ChatEvent.OnMessageValueChange -> onMessageValueChange(event.message)
             ChatEvent.OnSendMessageButtonClick -> onSendMessageButtonClick()
+            ChatEvent.OnReloadClick -> onReloadClick()
         }
     }
 
@@ -100,6 +103,17 @@ class ChatViewModel  @Inject constructor(
                 )
                 Log.d("ChatViewModel","downloaded image")
             }
+        }
+    }
+
+    private fun onReloadClick(){
+        try {
+            viewModelScope.launch {
+                userRepository.loadUserData(auth.uid!!)
+                _navigationEvent.send(NavigationEvent.Navigate(Route.chat,true))
+            }
+        }catch (e:Exception){
+            Log.d("ChatViewModel","${e.message}")
         }
     }
 

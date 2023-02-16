@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -113,13 +114,17 @@ fun ChatScreen(
             onSaveImageClick = {image,name->viewModel.saveMediaToStorage(image,name)}
         )
     else{
-        ChatNowAvailableUi(bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) })
+        ChatNowAvailableUi(
+            bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) },
+            onReloadClick = {viewModel.onEvent(ChatEvent.OnReloadClick)}
+            )
     }
 }
 
 @Composable
 private fun ChatNowAvailableUi(
     bottomNavBarNavigationEventSender: (NavigationEvent) -> Unit = {},
+    onReloadClick: ()->Unit = {}
 ){
     Scaffold(
         topBar = { MyTopAppBar("Чат")},
@@ -131,12 +136,17 @@ private fun ChatNowAvailableUi(
             .padding(it)
             .fillMaxSize(),
         contentAlignment = Alignment.Center) {
-            Text(
-                text = "Мы еще не прикрепили вас ко врачу, обратитесь по адресу",
-                modifier = Modifier.width(200.dp),
-            textAlign = TextAlign.Center,
-                fontSize = 20.sp
+            Column() {
+                Text(
+                    text = "Мы еще не прикрепили вас ко врачу, обратитесь по адресу",
+                    modifier = Modifier.width(200.dp),
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp
                 )
+                TextButton(onClick = onReloadClick) {
+                    Text(text = "Обновить", textDecoration = TextDecoration.Underline, color = MaterialTheme.colors.primary)
+                }
+            }
         }
     }
 }
@@ -256,11 +266,15 @@ private fun ChatScreenUi(
                                         if(images[message.imageBitmap]!=null)
                                             ImageContainer(
                                                 imageBitmap = images[message.imageBitmap]!!,
-                                                modifier = Modifier.width(270.dp).heightIn(max = 350.dp),
+                                                modifier = Modifier
+                                                    .width(270.dp)
+                                                    .heightIn(max = 350.dp),
                                                 onSaveClick = {bitmap -> onSaveImageClick(bitmap,message.imageBitmap.substringAfterLast('/'))}
                                             )
                                         else
-                                            ImageContainer(painterResource = R.drawable.grey_background, modifier = Modifier.width(270.dp).height(270.dp))
+                                            ImageContainer(painterResource = R.drawable.grey_background, modifier = Modifier
+                                                .width(270.dp)
+                                                .height(270.dp))
                                     }
                                 }
 

@@ -33,51 +33,21 @@ class HomeViewModel  @Inject constructor(
 
     fun onEvent(event: HomeEvent) {
         when (event) {
-            HomeEvent.OnEditAllergiesClick -> onEditAllergiesClick()
-            HomeEvent.OnEditHeightClick -> onEditHeightClick()
-            HomeEvent.OnCancelEditAllergiesClick -> onCancelEditAllergiesClick()
-            HomeEvent.OnCancelEditHeightClick -> onCancelEditHeightClick()
             is HomeEvent.OnConfirmEditAllergiesClick -> onConfirmEditAllergiesClick(event.allergies)
             is HomeEvent.OnConfirmEditHeightClick -> onConfirmEditHeightClick(event.height)
-            is HomeEvent.OnAllergiesChange -> {}
-            is HomeEvent.OnHeightChange -> {}
         }
     }
 
-    private fun onEditHeightClick(){
-        state = state.copy(
-            isEditingHeight = true
-        )
-    }
 
-    private fun onEditAllergiesClick(){
-        state = state.copy(
-            isEditingAllergies = true
-        )
-    }
-
-    private fun onCancelEditHeightClick(){
-        state = state.copy(
-            isEditingHeight = false
-        )
-    }
-
-    private fun onCancelEditAllergiesClick(){
-        state = state.copy(
-            isEditingAllergies = false
-        )
-    }
 
     private fun onConfirmEditHeightClick(height:String){
         state = state.copy(
-            isEditingHeight = false,
             height = if(height.isEmpty()) 0 else height.toInt()
         )
     }
 
     private fun onConfirmEditAllergiesClick(allergies:String){
         state = state.copy(
-            isEditingAllergies = false,
             allergies = allergies
         )
     }

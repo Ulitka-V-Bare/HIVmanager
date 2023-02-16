@@ -19,6 +19,7 @@ data class DiaryEntry(
     val lowerTension:Int = 0,
     val weight: Double = 0.0,
     val temperature: Double = 0.0,
+    val pulse: Int = 0,
     val comment:String = "",
     val time: String = ""
 )

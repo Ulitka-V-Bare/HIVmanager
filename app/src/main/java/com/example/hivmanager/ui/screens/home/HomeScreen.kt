@@ -52,8 +52,11 @@ fun HomeScreen(
         bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) },
         onOpenPillListClick = { viewModel.sendNavigationEvent(NavigationEvent.Navigate(Route.pillReminder)) },
         onOpenNotificationChannelSettingsClick = { openNotificationChannelSettings(context) },
+        onOpenDiaryClick = {viewModel.sendNavigationEvent(NavigationEvent.Navigate(Route.diary))},
         onConfirmEditHeightClick = {viewModel.onEvent(HomeEvent.OnConfirmEditHeightClick(it))},
-        userHeight = viewModel.state.height
+        onConfirmEditAllergiesClick = {viewModel.onEvent(HomeEvent.OnConfirmEditAllergiesClick(it))},
+        userHeight = viewModel.state.height,
+        userAllergies = viewModel.state.allergies
     )
 }
 
@@ -63,6 +66,7 @@ private fun HomeScreenUi(
     bottomNavBarNavigationEventSender: (NavigationEvent) -> Unit = {},
     onOpenPillListClick: () -> Unit = {},
     onOpenNotificationChannelSettingsClick: () -> Unit = {},
+    onOpenDiaryClick: ()->Unit = {},
     userHeight: Int = 0,
     userAllergies: String = "",
     onConfirmEditAllergiesClick: (String)->Unit = {},
@@ -77,79 +81,134 @@ private fun HomeScreenUi(
                 .padding(it)
                 .fillMaxSize()
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                var isEditingHeight by remember { mutableStateOf(false) }
-                Text(
-                    text = "Мой рост: ",
-                )
-                if (!isEditingHeight) {
-                    Text(
-                        text = "$userHeight"
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(onClick = {isEditingHeight=true}) {
-                        Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = "edit height button"
-                        )
-                    }
-                } else {
-                    var tempHeight by remember { mutableStateOf(if(userHeight==0) "" else userHeight.toString()) }
-                    TextField(
-                        value = tempHeight,
-                        onValueChange = { value ->
-                            if (value.length <= 3 && isAllDigits(value))
-                                tempHeight = value
-                        },
-                        trailingIcon = {
-                            Row() {
-                                IconButton(onClick = { isEditingHeight = false }) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Close,
-                                        contentDescription = "close height button"
-                                    )
-                                }
-                                IconButton(onClick = {
-                                    onConfirmEditHeightClick(tempHeight)
-                                    isEditingHeight = false
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Done,
-                                        contentDescription = "close height button"
-                                    )
-                                }
-                            }
-                        }
-                    )
-                }
-
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Мой Аллергии: $userAllergies",
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                IconButton(onClick = {  }) {
-                    Icon(
-                        imageVector = Icons.Filled.Edit,
-                        contentDescription = "edit height button"
-                    )
-                }
+            heightContainer(userHeight,{onConfirmEditHeightClick(it)})
+            allergiesContainer(userAllergies,{onConfirmEditAllergiesClick(it)})
+            Button(onClick = onOpenDiaryClick) {
+                Text(text = "Дневник")
             }
             Button(onClick = onOpenPillListClick) {
-                Text(text = "My pills")
+                Text(text = "Напоминания")
             }
             Button(onClick = onOpenNotificationChannelSettingsClick) {
-                Text(text = "Notification settings")
+                Text(text = "Настройки уведомлений")
             }
 
         }
+    }
+}
+
+
+@Composable
+private fun allergiesContainer(
+    userAllergies: String="",
+    onConfirmEditAllergiesClick: (String) ->Unit = {}
+){
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        var isEditingHeight by remember { mutableStateOf(false) }
+        Text(
+            text = "Мой рост: ",
+        )
+        if (!isEditingHeight) {
+            Text(
+                text = userAllergies
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(onClick = {isEditingHeight=true}) {
+                Icon(
+                    imageVector = Icons.Filled.Edit,
+                    contentDescription = "edit height button"
+                )
+            }
+        } else {
+            var tempAllergies by remember { mutableStateOf(userAllergies) }
+            TextField(
+                value = tempAllergies,
+                onValueChange = { value -> tempAllergies = value
+                },
+                trailingIcon = {
+                    Row() {
+                        IconButton(onClick = { isEditingHeight = false }) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = "close height button"
+                            )
+                        }
+                        IconButton(onClick = {
+                            onConfirmEditAllergiesClick(tempAllergies)
+                            isEditingHeight = false
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = "close height button"
+                            )
+                        }
+                    }
+                }
+            )
+        }
+
+    }
+}
+
+
+
+@Composable
+private fun heightContainer(
+    userHeight:Int = 0,
+    onConfirmEditHeightClick:(String)->Unit = {}
+){
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        var isEditingHeight by remember { mutableStateOf(false) }
+        Text(
+            text = "Мой рост: ",
+        )
+        if (!isEditingHeight) {
+            Text(
+                text = "$userHeight"
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(onClick = {isEditingHeight=true}) {
+                Icon(
+                    imageVector = Icons.Filled.Edit,
+                    contentDescription = "edit height button"
+                )
+            }
+        } else {
+            var tempHeight by remember { mutableStateOf(if(userHeight==0) "" else userHeight.toString()) }
+            TextField(
+                value = tempHeight,
+                onValueChange = { value ->
+                    if (value.length <= 3 && isAllDigits(value))
+                        tempHeight = value
+                },
+                trailingIcon = {
+                    Row() {
+                        IconButton(onClick = { isEditingHeight = false }) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = "close height button"
+                            )
+                        }
+                        IconButton(onClick = {
+                            onConfirmEditHeightClick(tempHeight)
+                            isEditingHeight = false
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = "close height button"
+                            )
+                        }
+                    }
+                }
+            )
+        }
+
     }
 }
 

@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.hivmanager.ui.screens.addpill.AddPillScreen
 import com.example.hivmanager.ui.screens.chat.ChatScreen
+import com.example.hivmanager.ui.screens.diary.DiaryScreen
 import com.example.hivmanager.ui.screens.doctorhome.DoctorHomeScreen
 import com.example.hivmanager.ui.screens.home.HomeScreen
 import com.example.hivmanager.ui.screens.info.InfoScreen
@@ -73,6 +74,14 @@ fun SetupNavGraph(
             route = Route.pillReminder
         ){
             MyPillsScreen(onNavigate = navController::navigate)
+        }
+        composable(
+            route=Route.diary
+        ){
+            DiaryScreen(
+                onNavigate = navController::navigate,
+                onNavigateUp = {navController.navigateUp()},
+            )
         }
         doctorNavigation(navController)
     }

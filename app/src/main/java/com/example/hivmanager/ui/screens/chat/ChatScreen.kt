@@ -43,6 +43,7 @@ import com.example.hivmanager.ui.screens.components.MyTopAppBar
 import com.example.hivmanager.ui.theme.HIVmanagerTheme
 import com.example.hivmanager.ui.theme.White200
 import com.example.hivmanager.ui.theme.White500
+import kotlinx.coroutines.flow.collect
 
 @Composable
 fun ChatScreen(
@@ -237,7 +238,10 @@ private fun ChatScreenUi(
                 }
             }
             else {
-                LazyColumn(state = lazyListState) {
+                LazyColumn(
+                    state = lazyListState,
+                    reverseLayout = true
+                ) {
                     itemsIndexed(messageList) { index, message ->
                         Row(
                             horizontalArrangement = if (message.sender == userID) Arrangement.End else Arrangement.Start,

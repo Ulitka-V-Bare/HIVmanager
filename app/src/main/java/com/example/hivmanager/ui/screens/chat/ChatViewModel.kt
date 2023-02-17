@@ -52,6 +52,7 @@ class ChatViewModel  @Inject constructor(
     private val _navigationEvent = Channel<NavigationEvent>()
     val uiEvent = _navigationEvent.receiveAsFlow()
 
+
     val lazyColumnScrollState = LazyListState()
 
     var patientID:String? = null
@@ -75,13 +76,9 @@ class ChatViewModel  @Inject constructor(
 
     private fun onGetData(list:MutableList<Message>){
         state = state.copy(
-            allMessages = list.sortedBy { it.time },
+            allMessages = list.sortedByDescending { it.time },
             isLoading = false
         )
-        viewModelScope.launch {
-            delay(100)
-            lazyColumnScrollState.scrollToItem(state.allMessages.size)
-        }
         Log.d("ChatViewModel","chat loaded")
         userRepository.setOnUpdateListener(
             chatID = chatID,
@@ -227,12 +224,9 @@ class ChatViewModel  @Inject constructor(
             val myMessage = Message(senderID.toString(),message.toString(),time.toString().toLong(), image.toString())
             if(myMessage !in state.allMessages) {
                 state = state.copy(
-                    allMessages = state.allMessages.plus(myMessage)
+                  //  allMessages = state.allMessages.plus(myMessage)
+                    allMessages = listOf(myMessage).plus(state.allMessages)
                 )
-                viewModelScope.launch {
-                    delay(100)
-                    lazyColumnScrollState.scrollToItem(state.allMessages.size)
-                }
             }
             Log.d("ChatViewModel","$message")
         }

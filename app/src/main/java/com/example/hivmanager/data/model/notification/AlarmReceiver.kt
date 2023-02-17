@@ -8,7 +8,9 @@ import android.os.PowerManager
 import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
 
-
+/**
+ * класс, который работает в фоновом режиме, он обрабатывает входящие intent
+ * и создает уведомления*/
 @AndroidEntryPoint
 class AlarmReceiver: BroadcastReceiver() {
 
@@ -22,14 +24,15 @@ class AlarmReceiver: BroadcastReceiver() {
         }
         val pm = context!!.getSystemService(Context.POWER_SERVICE) as PowerManager
         val isScreenOn =
-            if (Build.VERSION.SDK_INT >= 20) pm.isInteractive else pm.isScreenOn // check if screen is on
+            if (Build.VERSION.SDK_INT >= 20) pm.isInteractive else pm.isScreenOn // проверить, включен ли экран
 
         if (!isScreenOn) {
             val wl = pm.newWakeLock(
                 PowerManager.SCREEN_DIM_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
                 "myApp:notificationLock"
             )
-            wl.acquire(3000) //set your time in milliseconds
+            wl.acquire(3000) //включение экрана, если он выключен
+            //через 3 секунды, чтобы успеть обработать и выставить уведомление
         }
         Log.d("receiver","notification sent")
     }

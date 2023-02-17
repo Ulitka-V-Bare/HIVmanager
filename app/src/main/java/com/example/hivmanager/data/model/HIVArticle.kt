@@ -1,5 +1,6 @@
 package com.example.hivmanager.data.model
-
+/** хранит статьи из информационного раздела
+ * */
 data class HIVArticle(
     val header:String = "",
     val text:String = ""

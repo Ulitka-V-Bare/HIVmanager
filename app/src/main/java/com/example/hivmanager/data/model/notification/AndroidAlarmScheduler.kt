@@ -6,19 +6,19 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import java.time.ZoneId
-
+/** реализация класса для отправки уведомлений*/
 class AndroidAlarmScheduler(
     private val context: Context
 ): AlarmScheduler {
 
     private val alarmManager = context.getSystemService(AlarmManager::class.java)
-
+    /**назначение уведомления
+     * */
     override fun schedule(item: AlarmItem) {
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("EXTRA_MESSAGE", item.message)
         }
-        Log.d("AlarmScheduler","before alarmManager")
-        alarmManager.setExactAndAllowWhileIdle(
+        alarmManager.setExactAndAllowWhileIdle(//требуем точное время
             AlarmManager.RTC_WAKEUP,
             item.time.atZone(ZoneId.systemDefault()).toEpochSecond() * 1000,
             PendingIntent.getBroadcast(
@@ -30,6 +30,9 @@ class AndroidAlarmScheduler(
         )
     }
 
+    /**отмена уведомления, сравнение происходит по хешкоду,
+     *  хешкоды равны, если содержимые AlarmItem равны
+     * */
     override fun cancel(item: AlarmItem) {
         try {
             alarmManager.cancel(

@@ -5,6 +5,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+/** класс для хранения информации о напоминании о приеме препарата
+ * */
 
 @Serializable
 data class PillInfo(

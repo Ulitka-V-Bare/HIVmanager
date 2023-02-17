@@ -9,16 +9,23 @@ import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.hivmanager.MainActivity
 import com.example.hivmanager.R
 import com.example.hivmanager.data.model.Constants.CHANNEL_ID
+import com.example.hivmanager.data.model.PillInfo
+import java.time.LocalDateTime
 
+/** класс содержит функции для создания уведомления
+ * */
 class NotificationHelper(val context:Context) {
 
     private val NOTIFICATION_ID = 1
 
+        /**андроид системы, версии которых больше или равны 26 требуют создания канала уведомлений
+         * */
     private fun createNotificationChannel(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(CHANNEL_ID, CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH ).apply {
@@ -32,12 +39,15 @@ class NotificationHelper(val context:Context) {
             notificationManager.createNotificationChannel(channel)
         }
     }
-
+    /**создавалась для получения существующего канала и проверки на то, включены ли уведомления,
+     * не используется
+     * */
     fun getNotificationChannel():NotificationChannel{
         val notificationManager =  context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         return notificationManager.getNotificationChannel(CHANNEL_ID)
     }
-
+    /** создание и отображение уведомления с заданным заголовком и сообщением
+     * */
     fun createNotification(title: String, message: String){
         // 1
         createNotificationChannel()
@@ -68,5 +78,51 @@ class NotificationHelper(val context:Context) {
         // 6
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
 
+    }
+    /** функция создаст уведомления из экземпляра pillInfo и выставит их в нужное время
+     * */
+    fun createNotificationRequest(pillInfo: PillInfo,scheduler:AlarmScheduler) {
+        for (time in pillInfo.timeToTakePill) {
+            val firstDayToNotify = LocalDateTime.now()
+                .withHour(time.split(':')[0].toInt())
+                .withMinute(time.split(':')[1].toInt())
+                .withSecond(0)
+                .withNano(0)
+            Log.d("AddPillVM", "$firstDayToNotify")
+            for (i in 0 until pillInfo.duration) {
+                val alarmItem = AlarmItem(
+                    firstDayToNotify.plusDays(i.toLong()),
+                    "время принять: ${pillInfo.name}"
+                )
+                alarmItem.let(scheduler::schedule)
+            }
+        }
+    }
+    /** функция удалит уведомления, связанные с экземпляром pillInfo
+     * */
+    fun cancelNotifications(pillInfo: PillInfo, scheduler: AlarmScheduler){
+        for(time in pillInfo.timeToTakePill){
+            Log.d("cancelPill","${pillInfo.startDate} - ${time}")
+            val year = pillInfo.startDate.split('.')[2].toInt()
+            val month =pillInfo.startDate.split('.')[1].toInt()
+            val day = pillInfo.startDate.split('.')[0].toInt()
+            val hour = time.split(':')[0].toInt()
+            val minute = time.split(':')[1].toInt()
+            val firstDayToNotify = LocalDateTime.of(
+                year,
+                month,
+                day,
+                hour,
+                minute,
+                0,
+                0
+            )
+            Log.d("cancelPill","$firstDayToNotify")
+            //val firstDayToNotify = LocalDateTime.now().withHour(time.split(':')[0].toInt()).withMinute(time.split(':')[1].toInt())
+            for(i in 0 until pillInfo.duration){
+                val alarmItem = AlarmItem(firstDayToNotify.plusDays(i.toLong()),"время принять: ${pillInfo.name}")
+                alarmItem.let(scheduler::cancel)
+            }
+        }
     }
 }

@@ -42,8 +42,10 @@ object AppModule {
         firestore: FirebaseFirestore,
         @ApplicationContext
         context: Context,
-        database:FirebaseDatabase
-    ):UserRepository = UserRepository(auth,firestore,context,database)
+        database:FirebaseDatabase,
+        notificationHelper: NotificationHelper,
+        alarmScheduler: AlarmScheduler
+    ):UserRepository = UserRepository(auth,firestore,context,database,notificationHelper,alarmScheduler)
 
     @Singleton
     @Provides
@@ -52,6 +54,11 @@ object AppModule {
         context: Context,
     ):AlarmScheduler = AndroidAlarmScheduler(context)
 
+    @Provides
+    fun provideNotificationHelper(
+        @ApplicationContext
+        context: Context
+    ):NotificationHelper = NotificationHelper(context)
     @Provides
     fun provideNotificationChannel(
         @ApplicationContext

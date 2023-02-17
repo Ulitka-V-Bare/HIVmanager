@@ -5,7 +5,8 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.io.OutputStream
-
+/** объект, с помощью которого происходит запись и чтение из локального хранилища
+ * */
 object UserDataSerializer:Serializer<UserData> {
     override val defaultValue: UserData
         get() = UserData()

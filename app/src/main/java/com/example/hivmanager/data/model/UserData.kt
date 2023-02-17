@@ -8,7 +8,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
+/** класс с всей информацией о пользователей(не включая информацию врача)
+ * */
 @Serializable
 data class UserData(
     val pillInfoList: List<PillInfo> = listOf(),
@@ -16,7 +17,8 @@ data class UserData(
     val allergies:String = "",
     val diaryEntries: List<DiaryEntry> = listOf()
 )
-
+/** класс для хранения данных о записи в дневнике наблюдений
+ * */
 @Serializable
 data class DiaryEntry(
     val upperTension: Int = 0,
@@ -27,7 +29,8 @@ data class DiaryEntry(
     val comment:String = "",
     val time: String = "default value"
 )
-
+/** создает экземпляр UserData по данным из firebase
+ * */
 fun constructUserDataFromFirestore(result: DocumentSnapshot):UserData{
     val map = result.get("data") as Map<*, *>
     Log.d("construct","enter")

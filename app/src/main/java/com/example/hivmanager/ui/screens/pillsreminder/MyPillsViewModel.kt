@@ -10,6 +10,7 @@ import com.example.hivmanager.data.model.UserData
 import com.example.hivmanager.data.model.notification.AlarmItem
 import com.example.hivmanager.data.model.notification.AlarmScheduler
 import com.example.hivmanager.data.model.notification.AndroidAlarmScheduler
+import com.example.hivmanager.data.model.notification.NotificationHelper
 import com.example.hivmanager.data.repository.UserRepository
 import com.example.hivmanager.data.repository.dataStore
 import com.example.hivmanager.navigation.NavigationEvent
@@ -28,7 +29,8 @@ import javax.inject.Inject
 class MyPillsViewModel @Inject constructor(
     val auth: FirebaseAuth,
     val userRepository: UserRepository,
-    val scheduler:AlarmScheduler
+    val scheduler:AlarmScheduler,
+    val notificationHelper: NotificationHelper
     ): ViewModel() {
 
     private val _navigationEvent = Channel<NavigationEvent>()
@@ -46,37 +48,13 @@ class MyPillsViewModel @Inject constructor(
     private fun onDeletePillInfoClick(index:Int){
         viewModelScope.launch {
             Log.d("cancelPill","before cancelNotification")
-            cancelNotifications(userRepository.loadUserLocalData().pillInfoList[index])
+            notificationHelper.cancelNotifications(userRepository.loadUserLocalData().pillInfoList[index],scheduler)
             Log.d("cancelPill","before deletePillInfo")
             userRepository.deletePillInfo(index)
         }
     }
 
-    private fun cancelNotifications(pillInfo: PillInfo){
-        for(time in pillInfo.timeToTakePill){
-            Log.d("cancelPill","${pillInfo.startDate} - ${time}")
-            val year = pillInfo.startDate.split('.')[2].toInt()
-            val month =pillInfo.startDate.split('.')[1].toInt()
-            val day = pillInfo.startDate.split('.')[0].toInt()
-            val hour = time.split(':')[0].toInt()
-            val minute = time.split(':')[1].toInt()
-            val firstDayToNotify = LocalDateTime.of(
-                year,
-                month,
-                day,
-                hour,
-                minute,
-                0,
-                0
-            )
-            Log.d("cancelPill","$firstDayToNotify")
-            //val firstDayToNotify = LocalDateTime.now().withHour(time.split(':')[0].toInt()).withMinute(time.split(':')[1].toInt())
-            for(i in 0 until pillInfo.duration){
-                val alarmItem = AlarmItem(firstDayToNotify.plusDays(i.toLong()),"время принять: ${pillInfo.name}")
-                alarmItem.let(scheduler::cancel)
-            }
-        }
-    }
+
     private fun onAddNewPillInfoClick(){
         sendNavigationEvent(NavigationEvent.Navigate(Route.addPill))
     }

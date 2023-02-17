@@ -8,6 +8,8 @@ import android.widget.Toast
 import androidx.datastore.dataStore
 import androidx.lifecycle.viewModelScope
 import com.example.hivmanager.data.model.*
+import com.example.hivmanager.data.model.notification.AlarmScheduler
+import com.example.hivmanager.data.model.notification.NotificationHelper
 import com.example.hivmanager.ui.screens.chat.Message
 import com.google.firebase.auth.*
 import com.google.firebase.auth.PhoneAuthProvider.ForceResendingToken
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import okhttp3.internal.wait
+import org.checkerframework.checker.units.qual.s
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,38 +39,37 @@ import kotlin.coroutines.CoroutineContext
 
 
 val Context.dataStore by dataStore("data.json", UserDataSerializer)
+
+/** класс для взаимодействия с данными пользователя
+ * локальными и данными из базы
+ * */
 @Singleton
 class UserRepository @Inject constructor(
     private val auth:FirebaseAuth,
     private val firestore:FirebaseFirestore,
     @ApplicationContext
     val context: Context,
-    private val database:FirebaseDatabase
+    private val database:FirebaseDatabase,
+    val notificationHelper: NotificationHelper,
+    val scheduler: AlarmScheduler,
 ){
     var userType: String = ""
     var userDoctorID: String = ""
     var patientList:MutableList<String> = mutableListOf()
     var userDataFlow: Flow<UserData> = context.dataStore.data
+
+    /** получить локальные данные о пользователе
+     * */
     suspend fun loadUserLocalData():UserData{
         try {
             return context.dataStore.data.first()
         }catch (e:Exception){
             Log.d("UserRepository","${e.message}")
         }
-        try {
-           // Log.d("UserRepository","uid = ${auth.uid}")
-          //  val result = firestore.collection("users").document("${auth.uid!!}").get().await()
-          //  userData = constructUserDataFromFirestore(result)
-          //  val onlineUserData: UserData = result.get("data") as UserData
-           // Log.d("UserRepository","${onlineUserData.height}")
-           // Log.d("UserRepository","${result.documents}")
-            //userData = onlineUserData
-        }catch (e:Exception){
-            Log.d("UserRepository","${e.message}")
-        }
         return UserData()
     }
-
+    /** получить данные пользователя из базы
+     * */
     suspend fun loadUserDataFromDatabase(uid:String):UserData{//for doctor usage
         try {
             val result = firestore.collection("users").document(uid).get().await()
@@ -77,6 +79,9 @@ class UserRepository @Inject constructor(
             return UserData()
         }
     }
+    /** получить из базы данные о том, является ли пользователь врачом
+     * если да, то получить список пациентов, эти данные хранятся только в базе
+     * */
     suspend fun loadUserData(uid: String){
         val result = firestore.collection(Constants.USERS).document(uid).get().await()
         userType = result.get("type").toString()
@@ -88,20 +93,31 @@ class UserRepository @Inject constructor(
             }
         }
     }
-
+    /** при входе данные из базы перезаписывают локальные данные
+     *  выставляются все напоминания, полученные из базы
+     * */
     suspend fun onSignIn(uid: String){//load data and save it locally on sign in
         context.dataStore.updateData { loadUserDataFromDatabase(uid) }
+        for(pillInfo in loadUserDataFromDatabase(auth.uid!!).pillInfoList){
+            notificationHelper.createNotificationRequest(pillInfo, scheduler)
+        }
     }
-
+    /** при выходе локальные данные заменяются на пустые,
+     * все напоминания отменяются
+     * */
     suspend fun onSignOut(){
+        for(pillInfo in loadUserDataFromDatabase(auth.uid!!).pillInfoList){
+            notificationHelper.cancelNotifications(pillInfo, scheduler)
+        }
         context.dataStore.updateData { UserData() }
         auth.signOut()
     }
 
-    init {
-        Log.d("repo","initialization")
-    }
-
+    /** эта функция проходит по списку пациентов врача и загружает их последние сообщения
+     * полученные сообщения отправляются в функцию listAdder в формате "uid,message"
+     * функция onChildAdded срабатывает сначала на все данные, а затем всякий раз, когда добавляются новые
+     * таким образом, последнее сообщение отображается в реальном времени
+     * */
     fun loadLastMessages(scope: CoroutineScope,listAdder:(String,String)->Unit){//only for doctor usage
         for(patient in patientList){
             scope.launch {
@@ -113,15 +129,14 @@ class UserRepository @Inject constructor(
                             snapshot: DataSnapshot,
                             previousChildName: String?
                         ) {
-                            Log.d("userRepository","$snapshot")
                             listAdder(patient,snapshot.child("message").value.toString())
                         }
-
+                        //остальные функции не использованы, так как в них нет необходимости
                         override fun onChildChanged(
                             snapshot: DataSnapshot,
                             previousChildName: String?
                         ) {
-                            TODO("Not yet implemented")
+
                         }
 
                         override fun onChildRemoved(snapshot: DataSnapshot) {
@@ -132,11 +147,11 @@ class UserRepository @Inject constructor(
                             snapshot: DataSnapshot,
                             previousChildName: String?
                         ) {
-                            TODO("Not yet implemented")
+
                         }
 
                         override fun onCancelled(error: DatabaseError) {
-                            TODO("Not yet implemented")
+
                         }
 
                     })
@@ -149,6 +164,10 @@ class UserRepository @Inject constructor(
         }
 
     }
+    /**добавляет пользователя в базу, если его там нет
+     * использовается при входе
+     */
+
     fun addUserToDatabase(uid:String?){
         var ifExists = false
         if(uid==null) return
@@ -163,6 +182,8 @@ class UserRepository @Inject constructor(
             }
         }
     }
+    /** отправляет код подтверждения пользователю
+     * */
 
     fun sendVerificationCode(
         phoneNumber:String,
@@ -179,26 +200,33 @@ class UserRepository @Inject constructor(
             .build()
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
+    /** обновляет данные пользователя в базе(для синхронизации данных в базе и локальных)
+     * */
     suspend fun updateUserDataOnDatabase(){
         try {
+            Log.d("userRepository","updating base, userType = $userType")
             if(userType=="user")
                 firestore.collection("users").document(auth.uid!!).update(
                     mapOf("data" to context.dataStore.data.first()),
-                    //  SetOptions.merge()
                 )
         }catch (e:Exception){
-
+            Log.d("userRepository","${e.message}")
         }
     }
+    /** удаляет напоминание из локального хранилища и обновляет данные в базе
+     * */
     suspend fun deletePillInfo(index:Int){
+        Log.d("userRepository","before update local")
         context.dataStore.updateData {
             it.copy(pillInfoList = it.pillInfoList.minus(it.pillInfoList[index]))
         }
+        Log.d("userRepository","before update in base")
         updateUserDataOnDatabase()
       //  userData = userData.copy(pillInfoList = userData.pillInfoList.minus(userData.pillInfoList[index]))
     }
 
-
+    /** добавляет напоминание в локальное хранилище и обновляет данные в базе
+     * */
     suspend fun addPillInfo(pillInfo: PillInfo){
         context.dataStore.updateData {
             it.copy(pillInfoList = it.pillInfoList.plus(pillInfo))
@@ -208,6 +236,8 @@ class UserRepository @Inject constructor(
 
     }
 
+    /** добавляет запись дневника наблюдений в локальное хранилище и обновляет данные в базе
+     * */
     suspend fun addDiaryEntry(diaryEntry: DiaryEntry){
         context.dataStore.updateData {
             it.copy(diaryEntries = listOf(diaryEntry).plus(it.diaryEntries))
@@ -215,6 +245,8 @@ class UserRepository @Inject constructor(
         updateUserDataOnDatabase()
        //userData = userData.copy(diaryEntries = userData.diaryEntries.plus(diaryEntry))
     }
+    /** удаляет запись дневника наблюдений из локального хранилища и обновляет данные в базе
+     * */
     suspend fun deleteDiaryEntry(diaryEntry: DiaryEntry){
         context.dataStore.updateData {
             it.copy(diaryEntries = it.diaryEntries.minus(diaryEntry))
@@ -222,6 +254,8 @@ class UserRepository @Inject constructor(
         updateUserDataOnDatabase()
        // userData = userData.copy(diaryEntries = userData.diaryEntries.minus(diaryEntry))
     }
+    /** добавляет рост в локальное хранилище и обновляет данные в базе
+     * */
 
     suspend fun setHeight(height:Int){
         context.dataStore.updateData {
@@ -229,7 +263,8 @@ class UserRepository @Inject constructor(
         }
         updateUserDataOnDatabase()
     }
-
+    /** добавляет аллергии в локальное хранилище и обновляет данные в базе
+     * */
     suspend fun setAllergies(allergies:String){
         context.dataStore.updateData {
             it.copy(allergies = allergies)
@@ -238,14 +273,11 @@ class UserRepository @Inject constructor(
     }
 
 
-
+    /** отправляет сообщение в чат
+     * id чата формируется как соединение id пользователя и id врача
+     *  поддерживается загрузка изображений
+     * */
     fun sendMessage(chatID:String, message:String, imageUri:Uri?){
-//        val ref = database.getReference("messages").child(chatID).child("${com.google.firebase.Timestamp.now()}")
-//        ref.updateChildren(mapOf(
-//            "message" to message,
-//            "time" to "${com.google.firebase.Timestamp.now().seconds}",
-//            "author" to "${auth.uid}"
-//        ))
         val ref = database.getReference("messages").child(chatID).push()
         ref.updateChildren(
             mapOf(
@@ -257,9 +289,11 @@ class UserRepository @Inject constructor(
         )
         uploadImage(imageUri, chatID, ref.key!!)
     }
-
+    /** эта функция позволяет получать сообщения в реальном времени, методы, кроме onChildAdded
+     * не реализованы, так как в них нет нужды
+     * */
     fun setOnUpdateListener(chatID:String, onChildAddedListener: (DataSnapshot)->Unit,onLoaded:()->Unit){
-        val ref = database.getReference("messages").child(chatID).addChildEventListener(
+        database.getReference("messages").child(chatID).addChildEventListener(
             object :ChildEventListener{
                 override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                     onChildAddedListener(snapshot)
@@ -267,29 +301,30 @@ class UserRepository @Inject constructor(
                 }
 
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                    TODO("Not yet implemented")
+                  //  TODO("Not yet implemented")
                 }
 
                 override fun onChildRemoved(snapshot: DataSnapshot) {
-                    TODO("Not yet implemented")
+                  //  TODO("Not yet implemented")
                 }
 
                 override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-                    TODO("Not yet implemented")
+                    //TODO("Not yet implemented")
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    TODO("Not yet implemented")
+                  //  TODO("Not yet implemented")
                 }
 
             }
         )
 
     }
-
-    suspend fun getMessageList(chatID:String,onGetData:(MutableList<Message>)->Unit){
+    /** функция для загрузки сообщений в чат
+     * */
+    fun getMessageList(chatID:String,onGetData:(MutableList<Message>)->Unit){
         val messageList:MutableList<Message> = mutableListOf()
-        val ref = database.getReference("messages").child(chatID).addListenerForSingleValueEvent(
+        database.getReference("messages").child(chatID).addListenerForSingleValueEvent(
             object:ValueEventListener{
                 override fun onDataChange(snapshot: DataSnapshot) {
                     for(child in snapshot.children){
@@ -313,13 +348,14 @@ class UserRepository @Inject constructor(
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    TODO("Not yet implemented")
+                    //TODO("Not yet implemented")
                 }
 
             }
         )
     }
-
+    /** загрузка изображения в базу данных
+     * */
     private fun uploadImage(uri: Uri?,chatID:String,messageID:String) {
         val imageRef = FirebaseStorage.getInstance().getReference("images/${chatID}/${messageID}")
         if(uri!=null)

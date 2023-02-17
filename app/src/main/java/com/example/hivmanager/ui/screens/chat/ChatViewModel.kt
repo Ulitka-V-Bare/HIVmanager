@@ -2,7 +2,6 @@ package com.example.hivmanager.ui.screens.chat
 
 import android.content.ContentValues
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -12,11 +11,9 @@ import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
@@ -64,7 +61,7 @@ class ChatViewModel  @Inject constructor(
         viewModelScope.launch {
             delay(100)
             chatID = if(patientID==null) "${auth.uid}${userRepository.userDoctorID}" else "${patientID}${auth.uid}"
-            userRepository.getMessageList( chatID,{ onGetDate(it) })
+            userRepository.getMessageList( chatID,{ onGetData(it) })
         }
     }
 
@@ -76,11 +73,15 @@ class ChatViewModel  @Inject constructor(
         }
     }
 
-    private fun onGetDate(list:MutableList<Message>){
+    private fun onGetData(list:MutableList<Message>){
         state = state.copy(
             allMessages = list.sortedBy { it.time },
             isLoading = false
         )
+        viewModelScope.launch {
+            delay(100)
+            lazyColumnScrollState.scrollToItem(state.allMessages.size)
+        }
         Log.d("ChatViewModel","chat loaded")
         userRepository.setOnUpdateListener(
             chatID = chatID,

@@ -29,7 +29,8 @@ fun SetupNavGraph(
         composable(
             route = Route.chat
         ){
-            ChatScreen(onNavigate = navController::navigate)
+            ChatScreen(onNavigate = navController::navigate,
+                onNavigateUp = {navController.navigateUp()},)
         }
         composable(
             route = Route.home
@@ -68,12 +69,14 @@ fun SetupNavGraph(
         composable(
             route = Route.addPill
         ){
-            AddPillScreen(onNavigate = navController::navigate)
+            AddPillScreen(onNavigate = navController::navigate,
+                onNavigateUp = {navController.navigateUp()},)
         }
         composable(
             route = Route.pillReminder
         ){
-            MyPillsScreen(onNavigate = navController::navigate)
+            MyPillsScreen(onNavigate = navController::navigate,
+                onNavigateUp = {navController.navigateUp()},)
         }
         composable(
             route=Route.diary

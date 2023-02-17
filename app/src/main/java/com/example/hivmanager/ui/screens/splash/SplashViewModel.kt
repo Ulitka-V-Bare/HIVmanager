@@ -42,7 +42,7 @@ class SplashViewModel @Inject constructor(
                 auth.signOut()
             }
             Log.d("splash","before loadUserLocalData")
-            userRepository.loadUserLocalData()
+           // userRepository.loadUserLocalData()
             userRepository.updateUserDataOnDatabase()
             Log.d("splash","after loadUserLocalData")
                 //load data into UserRepository
@@ -50,7 +50,9 @@ class SplashViewModel @Inject constructor(
                 _navigationEvent.send(NavigationEvent.Navigate(Route.signIn,))
             }
             else{
+                Log.d("splash","before")
                 userRepository.loadUserData(auth.uid!!)
+                Log.d("splash","after")
                 if(userRepository.userType=="user"){
                     _navigationEvent.send(NavigationEvent.Navigate(Route.home,))
                 }

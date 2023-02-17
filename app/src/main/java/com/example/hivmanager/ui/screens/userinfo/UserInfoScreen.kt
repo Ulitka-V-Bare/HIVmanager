@@ -1,5 +1,10 @@
-package com.example.hivmanager.ui.screens.diary
+package com.example.hivmanager.ui.screens.userinfo
 
+import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.hivmanager.ui.screens.addpill.AddPillViewModel
+import com.example.hivmanager.ui.screens.diary.DiaryEvent
+import com.example.hivmanager.ui.screens.diary.DiaryViewModel
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
@@ -45,10 +50,10 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun DiaryScreen(
+fun UserInfoScreen(
     onNavigate: (route: String, popBackStack: Boolean) -> Unit,
     onNavigateUp: () -> Unit,
-    viewModel: DiaryViewModel = hiltViewModel(),
+    viewModel: UserInfoViewModel = hiltViewModel()
 ) {
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect {
@@ -63,236 +68,35 @@ fun DiaryScreen(
             }
         }
     }
-    var diaryEntries2 = viewModel.userRepository.userDataFlow.collectAsState(initial = UserData())
-
     DiaryScreenUi(
-        bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) },
-        onAddEntryClick = { viewModel.onEvent(DiaryEvent.OnAddDiaryEntryClick(it)) },
-        diaryList = diaryEntries2.value.diaryEntries,
-        onDeleteEntryClick = { viewModel.onEvent(DiaryEvent.OnDeleteDiaryEntryClick(it)) },
+        diaryList = viewModel.userData.diaryEntries,
         onBackClick = {viewModel.sendNavigationEvent(NavigationEvent.NavigateUp)}
     )
 }
 
+
+
+
 @Composable
 private fun DiaryScreenUi(
-    bottomNavBarNavigationEventSender: (NavigationEvent) -> Unit = {},
-    onAddEntryClick: (DiaryEntry) -> Unit = {},
-    onDeleteEntryClick: (DiaryEntry) -> Unit = {},
     diaryList: List<DiaryEntry> = listOf(diaryEntryExample),
     onBackClick:()->Unit = {}
 ) {
     Scaffold(
         topBar = { MyTopAppBar("Дневник", onBackClick = onBackClick) },
-        bottomBar = { BottomNavBar({ bottomNavBarNavigationEventSender(it) }) }
     ) {
         LazyColumn(modifier = Modifier.padding(it)) {
             item {
                 DiaryHeader()
             }
-            item {
-                AddEntry(onAddEntryClick = onAddEntryClick)
-            }
             items(diaryList) { diaryEntry ->
-                DiaryEntryContainer(diaryEntry, onDeleteDiaryEntryClick = onDeleteEntryClick)
+                DiaryEntryContainer(diaryEntry)
             }
             item {
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
-}
-
-@Composable
-private fun AddEntryTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    keyboardActions: KeyboardActions = KeyboardActions.Default,
-    keyboardOptions: KeyboardOptions = KeyboardOptions(
-        keyboardType = KeyboardType.Number,
-        imeAction = ImeAction.Next
-    ),
-) {
-    OutlinedTextFieldNoContentPadding(
-        value = value,
-        onValueChange = onValueChange,
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            unfocusedBorderColor = MaterialTheme.colors.primary,
-            focusedBorderColor = MaterialTheme.colors.primaryVariant
-        ),
-        modifier = modifier
-            .padding(horizontal = 3.dp, vertical = 2.dp)
-            .height(35.dp),
-        keyboardActions = keyboardActions,
-        keyboardOptions = keyboardOptions
-    )
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-private fun AddEntry(
-    onAddEntryClick: (DiaryEntry) -> Unit = {}
-) {
-    var sys by remember {
-        mutableStateOf("")
-    }
-    var dia by remember {
-        mutableStateOf("")
-    }
-    var pulse by remember {
-        mutableStateOf("")
-    }
-    var temperature by remember {
-        mutableStateOf("")
-    }
-    var weight by remember {
-        mutableStateOf("")
-    }
-    var comment by remember {
-        mutableStateOf("")
-    }
-    val focusManager = LocalFocusManager.current
-    val (sysField, diaField, pulseField, tempField, weightField, commentField) = remember { FocusRequester.createRefs() }
-
-    fun clear() {
-        comment = ""
-        sys = ""
-        dia = ""
-        pulse = ""
-        temperature = ""
-        weight = ""
-    }
-    Row(Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.weight(1f)) {
-            AddEntryTextField(
-                value = sys,
-                onValueChange = {
-                    if (isAllDigits(it) && it.length <= 3)
-                        sys = it
-                },
-                modifier = Modifier
-                    .focusRequester(sysField)
-                    .focusProperties { next = diaField },
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            AddEntryTextField(
-                value = dia,
-                onValueChange = {
-                    if (isAllDigits(it) && it.length <= 3)
-                        dia = it
-                },
-                modifier = Modifier
-                    .focusRequester(diaField)
-                    .focusProperties { next = pulseField },
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            AddEntryTextField(
-                value = pulse,
-                onValueChange = {
-                    if (isAllDigits(it) && it.length <= 3)
-                        pulse = it
-                },
-                modifier = Modifier
-                    .focusRequester(pulseField)
-                    .focusProperties { next = tempField },
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            AddEntryTextField(
-                value = temperature,
-                onValueChange = {
-                    if (isAllDigitsOrDot(it) && it.length <= 4)
-                        temperature = it
-                },
-                modifier = Modifier
-                    .focusRequester(tempField)
-                    .focusProperties { next = weightField },
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            AddEntryTextField(
-                value = weight,
-                onValueChange = {
-                    if (isAllDigitsOrDot(it) && it.length <= 5)
-                        weight = it
-                },
-                modifier = Modifier
-                    .focusRequester(weightField)
-                    .focusProperties { next = commentField },
-            )
-        }
-    }
-    Row(modifier = Modifier.fillMaxWidth()) {
-
-        Column(modifier = Modifier.fillMaxWidth()) {
-            OutlinedTextField(
-                value = comment,
-                onValueChange = {
-                    comment = it
-                },
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    unfocusedBorderColor = MaterialTheme.colors.primary,
-                    focusedBorderColor = MaterialTheme.colors.primaryVariant
-                ),
-                modifier = Modifier
-                    .padding(horizontal = 4.dp, vertical = 8.dp)
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .focusRequester(commentField),
-                placeholder = { Text(text = "Комментарий...") },
-            )
-        }
-    }
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.weight(1f)) {
-            TextButton(
-                onClick = { clear() },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Очистить")
-            }
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            TextButton(
-                onClick = {
-                    onAddEntryClick(
-                        DiaryEntry(
-                            upperTension = if (sys.isNotEmpty()) sys.toInt() else 0,
-                            lowerTension = if (dia.isNotEmpty()) dia.toInt() else 0,
-                            pulse = if (pulse.isNotEmpty()) pulse.toInt() else 0,
-                            temperature = if (temperature.isNotEmpty()) temperature.toDouble() else 0.0,
-                            weight = if (weight.isNotEmpty()) weight.toDouble() else 0.0,
-                            comment = comment,
-                            time = LocalDateTime.now()
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                        )
-                    )
-                    clear()
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Добавить")
-            }
-        }
-    }
-
-}
-
-private fun isAllDigits(s: String): Boolean {
-    for (char in s) {
-        if (!char.isDigit()) return false
-    }
-    return true
-}
-
-private fun isAllDigitsOrDot(s: String): Boolean {
-    for (char in s) {
-        if (!char.isDigit() && char != '.') return false
-    }
-    return true
 }
 
 @Composable
@@ -319,14 +123,8 @@ private fun DiaryHeader() {
 @Composable
 private fun DiaryEntryContainer(
     diaryEntry: DiaryEntry = diaryEntryExample,
-    onDeleteDiaryEntryClick: (DiaryEntry) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val deleteEntryDialogState = rememberMaterialDialogState()
-    DeleteEntryDialog(
-        dialogState = deleteEntryDialogState,
-        onConfirmClick = {onDeleteDiaryEntryClick(diaryEntry)}
-    )
     Surface(
         modifier = modifier.padding(8.dp),
         elevation = 6.dp
@@ -342,12 +140,6 @@ private fun DiaryEntryContainer(
                     fontSize = 14.sp,
                     modifier = Modifier.padding(start = 8.dp)
                 )
-                IconButton(onClick = { deleteEntryDialogState.show() }) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = "delete diary entry"
-                    )
-                }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(Modifier.fillMaxWidth()) {
@@ -439,30 +231,6 @@ private fun commentHolder(comment: String = "my comment") {
                 Text(text = comment, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
             }
         }
-    }
-}
-
-@Composable
-fun DeleteEntryDialog(
-    dialogState: MaterialDialogState,
-    onConfirmClick: ()->Unit
-){
-    MaterialDialog(
-        dialogState = dialogState,
-        properties = DialogProperties (
-            dismissOnBackPress = true,
-            dismissOnClickOutside = true,
-        ),
-        buttons = {
-            positiveButton(text = "ОК", onClick = onConfirmClick)
-            negativeButton(text = "Отмена")
-        }
-    ) {
-        Text(
-            text= "Вы уверены, что хотите удалить запись?",
-            modifier = Modifier.padding(16.dp),
-            textAlign = TextAlign.Center
-        )
     }
 }
 

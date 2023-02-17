@@ -67,6 +67,16 @@ class UserRepository @Inject constructor(
         }
         return UserData()
     }
+
+    suspend fun loadUserDataFromDatabase(uid:String):UserData{//for doctor usage
+        try {
+            val result = firestore.collection("users").document(uid).get().await()
+            return constructUserDataFromFirestore(result)
+        }catch (e:Exception){
+            Toast.makeText(context,"${e.message}",Toast.LENGTH_LONG).show()
+            return UserData()
+        }
+    }
     suspend fun loadUserData(uid: String){
         val result = firestore.collection(Constants.USERS).document(uid).get().await()
         userType = result.get("type").toString()
@@ -77,6 +87,15 @@ class UserRepository @Inject constructor(
                 patientList.add(patient.id)
             }
         }
+    }
+
+    suspend fun onSignIn(uid: String){//load data and save it locally on sign in
+        context.dataStore.updateData { loadUserDataFromDatabase(uid) }
+    }
+
+    suspend fun onSignOut(){
+        context.dataStore.updateData { UserData() }
+        auth.signOut()
     }
 
     init {
@@ -162,10 +181,11 @@ class UserRepository @Inject constructor(
     }
     suspend fun updateUserDataOnDatabase(){
         try {
-            firestore.collection("users").document(auth.uid!!).update(
-                mapOf("data" to context.dataStore.data.first()),
-                //  SetOptions.merge()
-            )
+            if(userType=="user")
+                firestore.collection("users").document(auth.uid!!).update(
+                    mapOf("data" to context.dataStore.data.first()),
+                    //  SetOptions.merge()
+                )
         }catch (e:Exception){
 
         }

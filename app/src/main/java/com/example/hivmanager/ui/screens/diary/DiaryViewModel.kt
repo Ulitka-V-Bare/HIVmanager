@@ -30,8 +30,6 @@ class DiaryViewModel @Inject constructor(
     private val _navigationEvent = Channel<NavigationEvent>()
     val uiEvent = _navigationEvent.receiveAsFlow()
 
-    val diaryEntries
-    get()=userRepository.userData.diaryEntries
 
 
     fun onEvent(event: DiaryEvent) {

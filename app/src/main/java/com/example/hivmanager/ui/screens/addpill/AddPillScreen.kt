@@ -42,6 +42,7 @@ import com.example.hivmanager.ui.screens.components.MyFloatingActionButton
 @Composable
 fun AddPillScreen(
     onNavigate: (route: String, popBackStack: Boolean) -> Unit,
+    onNavigateUp: () -> Unit,
     viewModel: AddPillViewModel = hiltViewModel()
 ) {
 
@@ -53,6 +54,9 @@ fun AddPillScreen(
             when (it) {
                 is NavigationEvent.Navigate -> {
                     onNavigate(it.route, it.popBackStack)
+                }
+                is NavigationEvent.NavigateUp -> {
+                    onNavigateUp()
                 }
                 else -> {}
             }
@@ -69,7 +73,8 @@ fun AddPillScreen(
         pillTime = viewModel.state.pillTime,
         onTimeAdded = {viewModel.onEvent(AddPillEvent.OnPillTimeAdded(it))},
         onDeletePillTimeClick = {viewModel.onEvent(AddPillEvent.OnDeletePillTimeClick(it))},
-        onConfirmClick = {viewModel.onEvent(AddPillEvent.OnConfirmClick)}
+        onConfirmClick = {viewModel.onEvent(AddPillEvent.OnConfirmClick)},
+        onBackClick = {viewModel.sendNavigationEvent(NavigationEvent.NavigateUp)}
     )
 }
 
@@ -88,7 +93,8 @@ private fun AddPillScreenUi(
     onPillDurationChange:(String)->Unit = {},
     onTimeAdded: (String) -> Unit = {},
     onDeletePillTimeClick:(Int)->Unit = {},
-    onConfirmClick:()->Unit = {}
+    onConfirmClick:()->Unit = {},
+    onBackClick:()->Unit = {}
 ){
     val dateDialogState = rememberMaterialDialogState()
 
@@ -106,7 +112,7 @@ private fun AddPillScreenUi(
     )
 
     Scaffold(
-        topBar = { MyTopAppBar("Добавить напоминание") },
+        topBar = { MyTopAppBar("Добавить напоминание",onBackClick = onBackClick) },
         bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender) },
         floatingActionButton = {
             MyFloatingActionButton(
@@ -175,7 +181,8 @@ private fun AddPillScreenUi(
             Text(text = "Длительность курса")
             AddPillTextField(
                 value = pillDuration,
-                onValueChange = onPillDurationChange,
+                onValueChange = {if(it.length in 1..3)
+                    onPillDurationChange(it)},
                 label = {Text(text = "Количество дней")}
             )
         }

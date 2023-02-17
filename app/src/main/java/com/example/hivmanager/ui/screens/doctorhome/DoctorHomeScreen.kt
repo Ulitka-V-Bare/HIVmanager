@@ -4,7 +4,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -40,7 +43,9 @@ fun DoctorHomeScreen(
     DoctorHomeScreenUi(
         patientList = viewModel.userRepository.patientList,
         messages = viewModel.state.messages,
-        onOpenChatClick = {viewModel.navigateToChat(it)}
+        onOpenChatClick = {viewModel.navigateToChat(it)},
+        onUserInfoClick = {viewModel.navigateToInfo(it)},
+        onSignOutClick = {viewModel.onSignOutClick()}
     )
 }
 
@@ -48,10 +53,20 @@ fun DoctorHomeScreen(
 fun DoctorHomeScreenUi(
     patientList: List<String> = listOf("dfsakasdf;j", "sdfwuqeirh"),
     messages: Map<String, String> = mapOf(),
-    onOpenChatClick: (String) -> Unit = {}
+    onOpenChatClick: (String) -> Unit = {},
+    onUserInfoClick: (String)->Unit = {},
+    onSignOutClick: ()->Unit = {}
 ) {
     Scaffold(
         topBar = { MyTopAppBar("Пациенты") },
+        floatingActionButton = { FloatingActionButton(
+            onClick = onSignOutClick,
+            backgroundColor = MaterialTheme.colors.primary,
+            shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 15))
+        ) {
+            Text(text = "Выход",modifier = Modifier.padding(horizontal = 24.dp))
+        }},
+        floatingActionButtonPosition = FabPosition.Center
     ) {
         LazyColumn(
             modifier = Modifier
@@ -69,12 +84,24 @@ fun DoctorHomeScreenUi(
                     Column(modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)) {
-                        Text(text = buildAnnotatedString {
-                            withStyle(style = SpanStyle(color = MaterialTheme.colors.primary)) {
-                                append("id: ")
+                        Row(Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text(text = buildAnnotatedString {
+                                withStyle(style = SpanStyle(color = MaterialTheme.colors.primary, fontSize = 20.sp)) {
+                                    append("id: ")
+                                }
+                                append(item)
+                            }, fontSize = 16.sp)
+                            IconButton(onClick = {onUserInfoClick(item)}, modifier = Modifier.size(24.dp)) {
+                                Icon(
+                                    imageVector = Icons.Filled.Info,
+                                    contentDescription = "go to user info",
+                                    tint = MaterialTheme.colors.primaryVariant,
+                                    modifier = Modifier.size(24.dp)
+                                )
                             }
-                            append(item)
-                        }, fontSize = 20.sp)
+                        }
+
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             //   text = if(messages.containsKey(item)) "message: ${messages[item]!!}" else "...",
@@ -92,6 +119,9 @@ fun DoctorHomeScreenUi(
                         )
                     }
                 }
+            }
+            item{
+                Spacer(modifier = Modifier.height(200.dp))
             }
         }
     }

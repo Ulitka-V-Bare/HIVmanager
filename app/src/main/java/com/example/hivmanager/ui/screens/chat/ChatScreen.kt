@@ -7,18 +7,15 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
-import android.view.Window
 import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -28,17 +25,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.hivmanager.R
 import com.example.hivmanager.navigation.NavigationEvent
@@ -46,15 +40,14 @@ import com.example.hivmanager.ui.screens.components.BottomNavBar
 import com.example.hivmanager.ui.screens.components.ImageContainer
 import com.example.hivmanager.ui.screens.components.LoadingGif
 import com.example.hivmanager.ui.screens.components.MyTopAppBar
-import com.example.hivmanager.ui.screens.info.InfoViewModel
 import com.example.hivmanager.ui.theme.HIVmanagerTheme
 import com.example.hivmanager.ui.theme.White200
 import com.example.hivmanager.ui.theme.White500
-import kotlinx.coroutines.NonDisposableHandle.parent
 
 @Composable
 fun ChatScreen(
     onNavigate: (route: String, popBackStack: Boolean) -> Unit,
+    onNavigateUp: () -> Unit,
     viewModel: ChatViewModel = hiltViewModel(),
     isDoctor:Boolean = false
 ) {
@@ -67,6 +60,9 @@ fun ChatScreen(
             when (it) {
                 is NavigationEvent.Navigate -> {
                     onNavigate(it.route, it.popBackStack)
+                }
+                is NavigationEvent.NavigateUp -> {
+                    onNavigateUp()
                 }
                 else -> {}
             }
@@ -93,9 +89,9 @@ fun ChatScreen(
     }
 
 
-    if(viewModel.userRepository.userDoctorID!="null" || viewModel.userRepository.userType=="doctor" || viewModel.userRepository.userDoctorID.isNotEmpty())
+    if((viewModel.userRepository.userDoctorID!="null"&&viewModel.userRepository.userDoctorID.isNotEmpty()) || viewModel.userRepository.userType=="doctor" )
         ChatScreenUi(
-            bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) },
+            navigationEventSender = { viewModel.sendNavigationEvent(it) },
             textFieldValue = viewModel.state.message,
             onTextFieldValueChange = { viewModel.onEvent(ChatEvent.OnMessageValueChange(it)) },
             onSendMessageButtonClick = { viewModel.onEvent(ChatEvent.OnSendMessageButtonClick) },
@@ -154,7 +150,7 @@ private fun ChatNowAvailableUi(
 
 @Composable
 private fun ChatScreenUi(
-    bottomNavBarNavigationEventSender: (NavigationEvent) -> Unit = {},
+    navigationEventSender: (NavigationEvent) -> Unit = {},
     textFieldValue: String = "",
     onTextFieldValueChange: (String) -> Unit = {},
     onSendMessageButtonClick: () -> Unit = {},
@@ -170,7 +166,12 @@ private fun ChatScreenUi(
     onSaveImageClick:(Bitmap,String)->Unit = {_,_->}
 ) {
     Scaffold(
-        topBar = { MyTopAppBar("Чат")},
+        topBar = {
+            if(!isDoctor)
+                MyTopAppBar("Чат")
+            else
+                MyTopAppBar("Чат", onBackClick = {navigationEventSender(NavigationEvent.NavigateUp)})
+                 },
         bottomBar = {
             Column() {
                 if(imageBitmap!=null) {
@@ -215,7 +216,7 @@ private fun ChatScreenUi(
                     )
                 }
                 if(!isDoctor) {
-                    BottomNavBar(bottomNavBarNavigationEventSender, 2)
+                    BottomNavBar(navigationEventSender, 2)
                 }
             }
 

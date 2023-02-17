@@ -161,9 +161,10 @@ class SignInViewModel @Inject constructor(
                     Log.d(TAG, "signInWithCredential:success")
                     //navigate to home screen
                     viewModelScope.launch {
-                        _navigationEvent.send(NavigationEvent.Navigate(Route.home))
+                        userRepository.addUserToDatabase(auth.uid)
+                        userRepository.onSignIn(auth.uid!!)
+                        _navigationEvent.send(NavigationEvent.Navigate(Route.home,true))
                     }
-                    userRepository.addUserToDatabase(auth.uid)
                     Toast.makeText(context,"Successfully signed in",Toast.LENGTH_SHORT).show()
                     //val user = task.result?.user
                 } else {

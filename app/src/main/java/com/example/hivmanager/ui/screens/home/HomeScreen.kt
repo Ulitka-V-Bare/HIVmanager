@@ -4,20 +4,30 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.hivmanager.R
 import com.example.hivmanager.data.model.Constants
 import com.example.hivmanager.data.model.UserData
 import com.example.hivmanager.navigation.NavigationEvent
@@ -56,11 +66,12 @@ fun HomeScreen(
         bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) },
         onOpenPillListClick = { viewModel.sendNavigationEvent(NavigationEvent.Navigate(Route.pillReminder)) },
         onOpenNotificationChannelSettingsClick = { openNotificationChannelSettings(context) },
-        onOpenDiaryClick = {viewModel.sendNavigationEvent(NavigationEvent.Navigate(Route.diary))},
-        onConfirmEditHeightClick = {viewModel.onEvent(HomeEvent.OnConfirmEditHeightClick(it))},
-        onConfirmEditAllergiesClick = {viewModel.onEvent(HomeEvent.OnConfirmEditAllergiesClick(it))},
+        onOpenDiaryClick = { viewModel.sendNavigationEvent(NavigationEvent.Navigate(Route.diary)) },
+        onConfirmEditHeightClick = { viewModel.onEvent(HomeEvent.OnConfirmEditHeightClick(it)) },
+        onConfirmEditAllergiesClick = { viewModel.onEvent(HomeEvent.OnConfirmEditAllergiesClick(it)) },
         userHeight = state.height,
-        userAllergies = state.allergies
+        userAllergies = state.allergies,
+        onSignOutClick = {viewModel.onEvent(HomeEvent.OnSignOutClick)}
     )
 }
 
@@ -70,33 +81,108 @@ private fun HomeScreenUi(
     bottomNavBarNavigationEventSender: (NavigationEvent) -> Unit = {},
     onOpenPillListClick: () -> Unit = {},
     onOpenNotificationChannelSettingsClick: () -> Unit = {},
-    onOpenDiaryClick: ()->Unit = {},
+    onOpenDiaryClick: () -> Unit = {},
     userHeight: Int = 0,
     userAllergies: String = "",
-    onConfirmEditAllergiesClick: (String)->Unit = {},
-    onConfirmEditHeightClick: (String)->Unit = {},
+    onConfirmEditAllergiesClick: (String) -> Unit = {},
+    onConfirmEditHeightClick: (String) -> Unit = {},
+    onSignOutClick:()->Unit = {}
 ) {
     Scaffold(
         topBar = { MyTopAppBar("Главная") },
-        bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender, 1) }
+        bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender, 1) },
+        floatingActionButton = { FloatingActionButton(
+            onClick = onSignOutClick,
+            backgroundColor = MaterialTheme.colors.primary,
+            shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 15))
+        ) {
+            Text(text = "Выход",modifier = Modifier.padding(horizontal = 24.dp))
+        }},
+        floatingActionButtonPosition = FabPosition.Center
     ) {
         Column(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
-            heightContainer(userHeight,{onConfirmEditHeightClick(it)})
-            allergiesContainer(userAllergies,{onConfirmEditAllergiesClick(it)})
-            Button(onClick = onOpenDiaryClick) {
-                Text(text = "Дневник")
-            }
-            Button(onClick = onOpenPillListClick) {
-                Text(text = "Напоминания")
-            }
-            Button(onClick = onOpenNotificationChannelSettingsClick) {
-                Text(text = "Настройки уведомлений")
-            }
+            HomeButton(
+                onClick = onOpenDiaryClick,
+                text = "Дневник",
+                icon = Icons.Filled.EditNote
+            )
+            HomeButton(
+                onClick = onOpenPillListClick,
+                text = "Напоминания",
+                icon = painterResource(id = R.drawable.pill)
+            )
 
+            HomeButton(
+                onClick = onOpenNotificationChannelSettingsClick,
+                text = "Настройки уведомлений",
+                icon = Icons.Filled.Settings
+            )
+
+            heightContainer(userHeight, { onConfirmEditHeightClick(it) })
+            allergiesContainer(userAllergies, { onConfirmEditAllergiesClick(it) })
+        }
+    }
+}
+
+@Composable
+private fun HomeButton(
+    modifier: Modifier = Modifier,
+    text: String = "",
+    onClick: () -> Unit = {},
+    icon: ImageVector = Icons.Filled.Close
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp)
+            .clickable { onClick() },
+        elevation = 4.dp
+    ) {
+        Row(
+            modifier = Modifier.height(48.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colors.primaryVariant
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(text = text)
+        }
+    }
+}
+
+@Composable
+private fun HomeButton(
+    modifier: Modifier = Modifier,
+    text: String = "",
+    onClick: () -> Unit = {},
+    icon: Painter
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp)
+            .clickable { onClick() },
+        elevation = 4.dp
+    ) {
+        Row(
+            modifier = Modifier.height(48.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = icon, contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colors.primaryVariant
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(text = text)
         }
     }
 }
@@ -104,33 +190,48 @@ private fun HomeScreenUi(
 
 @Composable
 private fun allergiesContainer(
-    userAllergies: String="",
-    onConfirmEditAllergiesClick: (String) ->Unit = {}
-){
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        var isEditingHeight by remember { mutableStateOf(false) }
-        Text(
-            text = "Мои аллергии: ",
-        )
-        if (!isEditingHeight) {
+    userAllergies: String = "",
+    onConfirmEditAllergiesClick: (String) -> Unit = {}
+) {
+
+    var isEditingHeight by remember { mutableStateOf(false) }
+
+    if (!isEditingHeight) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
             Text(
-                text = userAllergies
+                text = "Мои аллергии: ",
+            )
+            Text(
+                text = userAllergies,
+                //text = "adfskjlaksdfj;lkadjkldaj;sd; asdfask;fd;ls",
+                modifier = Modifier.widthIn(max = 230.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            IconButton(onClick = {isEditingHeight=true}) {
+            IconButton(
+                onClick = { isEditingHeight = true },
+                modifier = Modifier.size(24.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Filled.Edit,
-                    contentDescription = "edit height button"
+                    contentDescription = "edit height button",
+                    modifier = Modifier.size(24.dp)
                 )
             }
-        } else {
+        }
+
+    } else {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top
+        ) {
+            Text(
+                text = "Мои аллергии: ",
+            )
             var tempAllergies by remember { mutableStateOf(userAllergies) }
             TextField(
                 value = tempAllergies,
-                onValueChange = { value -> tempAllergies = value
+                onValueChange = { value ->
+                    tempAllergies = value
                 },
                 trailingIcon = {
                     Row() {
@@ -150,7 +251,11 @@ private fun allergiesContainer(
                             )
                         }
                     }
-                }
+                },
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = Color.Transparent
+                ),
+                //  modifier = Modifier.padding(end=50.dp)
             )
         }
 
@@ -158,14 +263,15 @@ private fun allergiesContainer(
 }
 
 
-
 @Composable
 private fun heightContainer(
-    userHeight:Int = 0,
-    onConfirmEditHeightClick:(String)->Unit = {}
-){
+    userHeight: Int = 0,
+    onConfirmEditHeightClick: (String) -> Unit = {}
+) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         var isEditingHeight by remember { mutableStateOf(false) }
@@ -177,14 +283,14 @@ private fun heightContainer(
                 text = "$userHeight"
             )
             Spacer(modifier = Modifier.width(8.dp))
-            IconButton(onClick = {isEditingHeight=true}) {
+            IconButton(onClick = { isEditingHeight = true }) {
                 Icon(
                     imageVector = Icons.Filled.Edit,
                     contentDescription = "edit height button"
                 )
             }
         } else {
-            var tempHeight by remember { mutableStateOf(if(userHeight==0) "" else userHeight.toString()) }
+            var tempHeight by remember { mutableStateOf(if (userHeight == 0) "" else userHeight.toString()) }
             TextField(
                 value = tempHeight,
                 onValueChange = { value ->
@@ -209,7 +315,10 @@ private fun heightContainer(
                             )
                         }
                     }
-                }
+                },
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = Color.Transparent
+                ),
             )
         }
 

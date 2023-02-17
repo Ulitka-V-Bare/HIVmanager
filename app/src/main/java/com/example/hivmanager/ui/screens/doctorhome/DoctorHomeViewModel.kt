@@ -37,6 +37,12 @@ class DoctorHomeViewModel @Inject constructor(
             )
         }
     }
+    fun onSignOutClick(){
+        viewModelScope.launch {
+            userRepository.onSignOut()
+            _navigationEvent.send(NavigationEvent.Navigate(Route.splash,true))
+        }
+    }
     private fun addMessageToMap(patient:String,message:String){
         state = state.copy(
             messages = state.messages.plus(patient to message)
@@ -47,6 +53,13 @@ class DoctorHomeViewModel @Inject constructor(
         state = state.copy(patientID = userID)
         viewModelScope.launch {
             _navigationEvent.send(NavigationEvent.Navigate(Route.doctorChat))
+        }
+    }
+
+    fun navigateToInfo(userID:String){
+        state = state.copy(patientID = userID)
+        viewModelScope.launch {
+            _navigationEvent.send(NavigationEvent.Navigate(Route.userInfo))
         }
     }
 }

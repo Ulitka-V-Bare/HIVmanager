@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.hivmanager.data.model.notification.NotificationHelper
 import com.example.hivmanager.data.repository.UserRepository
 import com.example.hivmanager.navigation.NavigationEvent
+import com.example.hivmanager.navigation.Route
 import com.example.hivmanager.ui.screens.signin.SignInEvent
 import com.example.hivmanager.ui.screens.signin.SignInState
 import com.google.firebase.auth.FirebaseAuth
@@ -33,9 +34,16 @@ class HomeViewModel  @Inject constructor(
         when (event) {
             is HomeEvent.OnConfirmEditAllergiesClick -> onConfirmEditAllergiesClick(event.allergies)
             is HomeEvent.OnConfirmEditHeightClick -> onConfirmEditHeightClick(event.height)
+            HomeEvent.OnSignOutClick -> onSignOutClick()
         }
     }
 
+    private fun onSignOutClick(){
+        viewModelScope.launch {
+            userRepository.onSignOut()
+            _navigationEvent.send(NavigationEvent.Navigate(Route.splash,true))
+        }
+    }
 
 
     private fun onConfirmEditHeightClick(height:String){

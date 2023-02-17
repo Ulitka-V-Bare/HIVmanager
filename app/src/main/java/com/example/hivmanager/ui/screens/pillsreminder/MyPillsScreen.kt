@@ -40,6 +40,7 @@ import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 @Composable
 fun MyPillsScreen(
     onNavigate: (route: String, popBackStack: Boolean) -> Unit,
+    onNavigateUp: () -> Unit,
     viewModel: MyPillsViewModel = hiltViewModel()
 ) {
     LaunchedEffect(key1 = true) {
@@ -47,6 +48,9 @@ fun MyPillsScreen(
             when (it) {
                 is NavigationEvent.Navigate -> {
                     onNavigate(it.route, it.popBackStack)
+                }
+                is NavigationEvent.NavigateUp -> {
+                    onNavigateUp()
                 }
                 else -> {}
             }
@@ -57,7 +61,8 @@ fun MyPillsScreen(
         bottomNavBarNavigationEventSender = {viewModel.sendNavigationEvent(it)},
         pillList = pillInfoList.pillInfoList,
         onDeletePillClick = {viewModel.onEvent(MyPillsEvent.OnDeletePillInfoClick(it))},
-        onAddNewPillClick = {viewModel.onEvent(MyPillsEvent.OnAddNewPillInfoClick)}
+        onAddNewPillClick = {viewModel.onEvent(MyPillsEvent.OnAddNewPillInfoClick)},
+        onBackClick = {viewModel.sendNavigationEvent(NavigationEvent.NavigateUp)}
     )
 }
 
@@ -67,11 +72,12 @@ private fun MyPillsScreenUi(
     bottomNavBarNavigationEventSender:(NavigationEvent)->Unit = {},
     pillList:List<PillInfo> = listOf(PillInfo_example,PillInfo_example,PillInfo_example),
     onDeletePillClick:(Int)->Unit = {},
-    onAddNewPillClick:()->Unit={}
+    onAddNewPillClick:()->Unit={},
+    onBackClick:()->Unit = {}
 ){
 
     Scaffold(
-        topBar = { MyTopAppBar("Мои напоминания") },
+        topBar = { MyTopAppBar("Мои напоминания",onBackClick = onBackClick) },
         bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender) },
         floatingActionButton = { MyFloatingActionButton(onClick = onAddNewPillClick)}
     ) {

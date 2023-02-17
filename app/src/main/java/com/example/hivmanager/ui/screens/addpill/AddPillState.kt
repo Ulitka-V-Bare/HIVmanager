@@ -7,5 +7,5 @@ data class AddPillState(
     val pillName:String = "",
     val pillStart:LocalDate = LocalDate.now(),
     val pillTime:List<String> = listOf(),
-    val pillDuration:String = ""
+    val pillDuration:String = "1"
 )

@@ -12,4 +12,5 @@ object Route {
     const val doctorHome = "doctorHome"
     const val doctorChat = "doctorChat"
     const val diary = "diary"
+    const val userInfo = "userInfo"
 }

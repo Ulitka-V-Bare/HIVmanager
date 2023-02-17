@@ -125,9 +125,9 @@ private fun SignInScreenUi(
                     "Отправить код"
                 else {
                     when (timerSeconds) {
-                        60 -> "Отправить код(1:00)"
-                        in 10..59 -> "Отправить код(0:${timerSeconds})"
-                        in 1..9 -> "Отправить код(0:0${timerSeconds})"
+                        60 -> "Отправить(1:00)"
+                        in 10..59 -> "Отправить(0:${timerSeconds})"
+                        in 1..9 -> "Отправить(0:0${timerSeconds})"
                         else -> "Отправить код"
                     }
 

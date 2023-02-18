@@ -18,6 +18,9 @@ import com.example.hivmanager.ui.screens.signin.SignInViewModel
 import com.example.hivmanager.ui.screens.splash.SplashScreen
 
 private val viewModelHolder = SharedViewModelHolder<SignInViewModel>()
+
+/** граф навигации, signIn и signInCodeSent используют одну viewModel
+ * */
 @Composable
 fun SetupNavGraph(
     navController: NavHostController

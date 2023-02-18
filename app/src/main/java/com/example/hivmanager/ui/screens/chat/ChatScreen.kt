@@ -70,6 +70,8 @@ fun ChatScreen(
         }
     }
     val context = LocalContext.current
+    /** обработка загрузки фотографии из локального хранилища на экран(не в базу)
+     * */
     val launcher = rememberLauncherForActivityResult(contract =
     ActivityResultContracts.GetContent()) { uri: Uri? ->
         Log.d("photo","launcher entered")
@@ -89,7 +91,8 @@ fun ChatScreen(
         viewModel.setImageBitmap(bitmap?.asImageBitmap())
     }
 
-
+    /** загружаем чат, если пользователю назвачен врач или же он сам является врачом
+     * */
     if((viewModel.userRepository.userDoctorID!="null"&&viewModel.userRepository.userDoctorID.isNotEmpty()) || viewModel.userRepository.userType=="doctor" )
         ChatScreenUi(
             navigationEventSender = { viewModel.sendNavigationEvent(it) },
@@ -98,7 +101,7 @@ fun ChatScreen(
             onSendMessageButtonClick = { viewModel.onEvent(ChatEvent.OnSendMessageButtonClick) },
             messageList = viewModel.state.allMessages,
             userID = viewModel.auth.uid,
-            lazyListState = viewModel.lazyColumnScrollState,
+           // lazyListState = viewModel.lazyColumnScrollState,
             isLoading = viewModel.state.isLoading,
             isDoctor = isDoctor,
             onAddImageClick = { launcher.launch("image/*") },
@@ -114,7 +117,7 @@ fun ChatScreen(
         ChatNowAvailableUi(
             bottomNavBarNavigationEventSender = { viewModel.sendNavigationEvent(it) },
             onReloadClick = {viewModel.onEvent(ChatEvent.OnReloadClick)}
-            )
+        )
     }
 }
 

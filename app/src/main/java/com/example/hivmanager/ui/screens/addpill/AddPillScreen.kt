@@ -36,9 +36,12 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.Done
 import com.example.hivmanager.ui.screens.components.MyFloatingActionButton
-
+/** экран, где происходит добавление напоминания в список
+ * */
 @Composable
 fun AddPillScreen(
     onNavigate: (route: String, popBackStack: Boolean) -> Unit,
@@ -124,7 +127,7 @@ private fun AddPillScreenUi(
         Column(
             modifier = Modifier
                 .padding(it)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 24.dp),
         ) {
             datePickerDialog(dateDialogState = dateDialogState, onDatePick = onPillStartDatePick)
 
@@ -148,7 +151,7 @@ private fun AddPillScreenUi(
             )
             Spacer(modifier = Modifier.height(32.dp))
             Text(text = "Время приема")
-            LazyColumn{
+            LazyColumn(modifier = Modifier.heightIn(max=220.dp)){
                 itemsIndexed(pillTime){ index,time ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -189,7 +192,8 @@ private fun AddPillScreenUi(
     }
 }
 
-
+/** выбор даты при помощи календаря
+ * */
 @Composable
 private fun datePickerDialog(
     dateDialogState:MaterialDialogState,
@@ -215,7 +219,8 @@ private fun datePickerDialog(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+/** текстовое поле для этого экрана
+ * */
 @Composable
 private fun AddPillTextField(
     modifier: Modifier = Modifier,

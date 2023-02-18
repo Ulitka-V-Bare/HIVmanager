@@ -52,12 +52,15 @@ class ChatViewModel  @Inject constructor(
     private val _navigationEvent = Channel<NavigationEvent>()
     val uiEvent = _navigationEvent.receiveAsFlow()
 
-
-    val lazyColumnScrollState = LazyListState()
+    /** при получении или отправке сообщения колонка с сообщениями листается вниз
+     * */
 
     var patientID:String? = null
 
     var chatID = ""
+    /** при инициализации начинаем загрузку сообщений из нужного чата, delay требуется для того, чтобы
+     * patientID успел прийти извне(в графе навигации)
+     * */
     init {
         viewModelScope.launch {
             delay(100)
@@ -65,7 +68,8 @@ class ChatViewModel  @Inject constructor(
             userRepository.getMessageList( chatID,{ onGetData(it) })
         }
     }
-
+    /** обработка входящего события
+     * */
     fun onEvent(event: ChatEvent) {
         when (event) {
             is ChatEvent.OnMessageValueChange -> onMessageValueChange(event.message)
@@ -73,7 +77,9 @@ class ChatViewModel  @Inject constructor(
             ChatEvent.OnReloadClick -> onReloadClick()
         }
     }
-
+    /** функция обрабатывает полученный массив сообщений из базы,
+     * сортирует по дате, после чего начинает загружать изображения
+     * */
     private fun onGetData(list:MutableList<Message>){
         state = state.copy(
             allMessages = list.sortedByDescending { it.time },
@@ -89,7 +95,8 @@ class ChatViewModel  @Inject constructor(
             startDownLoadingImages()
         }
     }
-
+    /** загрузка изображений с конца сообщений
+     * */
     suspend fun startDownLoadingImages(){
         Log.d("ChatViewModel","start downloading images")
         for(i in state.allMessages.size-1 downTo 0) {
@@ -103,7 +110,9 @@ class ChatViewModel  @Inject constructor(
             }
         }
     }
-
+    /** обработка обновления чата, если в базе был установлен врач для текущего пользователя,
+     * то откроется чат с ним
+     * */
     private fun onReloadClick(){
         try {
             viewModelScope.launch {
@@ -114,15 +123,21 @@ class ChatViewModel  @Inject constructor(
             Log.d("ChatViewModel","${e.message}")
         }
     }
-
+    /** здесь хранится ссылка на текущее прикрепленное изображение
+     * */
     fun setImageUri(uri: Uri?){
         state = state.copy(imageUri = uri)
     }
-
+    /** здесь хранится текущее прикрепленное изображение
+     * */
     fun setImageBitmap(imageBitmap: ImageBitmap?){
         state = state.copy(imageBitmap = imageBitmap)
     }
-
+    /** загрузка изображения из базы в чат
+     * разбита на два блока try-catch для двух случаев:
+     * 1) что-то не так с базой
+     * 2) не получилось обработать загруженный файл
+     * */
     suspend fun downloadImage(imagePath:String):ImageBitmap?{
         try {
             val imageBytes = FirebaseStorage.getInstance().getReference(imagePath).getBytes(ONE_MEGABYTE).await()
@@ -138,34 +153,29 @@ class ChatViewModel  @Inject constructor(
         }
     }
 
-
-    private fun changeStateToLoaded(){
-        if(state.isLoading){
-            state=state.copy(
-                allMessages = state.allMessages.sortedBy { it.time },
-                isLoading = false
-            )
-            Log.d("ChatViewModel","chat loaded")
-        }
-    }
+    /** отправка сообщения
+     * */
     private fun onSendMessageButtonClick(){
         if(state.message.isNotEmpty()||state.imageUri!=null) {
             userRepository.sendMessage(chatID, state.message, state.imageUri)
             state = state.copy(message = "", imageBitmap = null, imageUri = null)
         }
     }
-
+    /** обработка изменения вводимого сообщения
+     * */
     private fun onMessageValueChange(message:String){
         state = state.copy(message=message)
     }
 
-
+    /** отправка события навигации
+     * */
     fun sendNavigationEvent(event: NavigationEvent){
         viewModelScope.launch {
             _navigationEvent.send(event)
         }
     }
-
+    /** функция сохранения изображения из чата в галерею
+     * */
     fun saveMediaToStorage(bitmap: Bitmap,imageName:String) {
         Log.d("ChatViewModel","")
         //Generating a file name
@@ -213,7 +223,10 @@ class ChatViewModel  @Inject constructor(
 
 
 
-
+    /** обработка появления новых сообщений в базе в реальном времени
+     * прежде проходится по всем сообщения, но они пропускаются,
+     * так как сначала чат прогружаем в другой функции
+     * */
     private fun getNewMessages(snapshot: DataSnapshot){
         val iterator = snapshot.children.iterator()
         while(iterator.hasNext()){

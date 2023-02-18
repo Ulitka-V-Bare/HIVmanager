@@ -60,7 +60,10 @@ class NotificationHelper(val context:Context) {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         // 3
-        val pendingIntent = PendingIntent.getActivity(context, 0, intent, 0)
+        val pendingIntent = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        else
+            PendingIntent.getActivity(context, 0, intent, 0)
         // 4
         val icon = BitmapFactory.decodeResource(context.resources, R.drawable.logo_light)
         val DEFAULT_VIBRATE_PATTERN = longArrayOf(0, 250, 250, 250)

@@ -1,5 +1,7 @@
 package com.example.hivmanager.navigation
 
+/** список назначений в графе навигации
+ * */
 object Route {
     const val signIn = "signIn"
     const val signInCodeSent = "signInCodeSent"

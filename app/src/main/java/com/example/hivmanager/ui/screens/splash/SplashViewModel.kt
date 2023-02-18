@@ -8,12 +8,12 @@ import com.example.hivmanager.navigation.NavigationEvent
 import com.example.hivmanager.navigation.Route
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.PhoneAuthProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import okhttp3.internal.wait
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,6 +34,7 @@ class SplashViewModel @Inject constructor(
         viewModelScope.launch{
             delay(500)
           //  auth.signOut()
+            auth.firebaseAuthSettings.setAppVerificationDisabledForTesting(true)
 
 
             try{
@@ -47,14 +48,14 @@ class SplashViewModel @Inject constructor(
             Log.d("splash","after loadUserLocalData")
                 //load data into UserRepository
             if(auth.currentUser==null){
-                _navigationEvent.send(NavigationEvent.Navigate(Route.signIn,))
+                _navigationEvent.send(NavigationEvent.Navigate(Route.signIn))
             }
             else{
                 Log.d("splash","before")
                 userRepository.loadUserData(auth.uid!!)
                 Log.d("splash","after")
                 if(userRepository.userType=="user"){
-                    _navigationEvent.send(NavigationEvent.Navigate(Route.home,))
+                    _navigationEvent.send(NavigationEvent.Navigate(Route.home))
                 }
                 if(userRepository.userType=="doctor"){
                     _navigationEvent.send(NavigationEvent.Navigate(Route.doctorHome))

@@ -23,6 +23,8 @@ import dagger.hilt.components.SingletonComponent
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
+/** модуль внедрения зависимостей
+ * */
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {

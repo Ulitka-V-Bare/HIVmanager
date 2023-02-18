@@ -15,6 +15,11 @@ import com.example.hivmanager.ui.screens.userinfo.UserInfoViewModel
 private val doctorViewModelHolder = SharedViewModelHolder<DoctorHomeViewModel>()
 private val chatViewModelHolder = SharedViewModelHolder<ChatViewModel>()
 private val infoViewModelHolder = SharedViewModelHolder<UserInfoViewModel>()
+
+/** навигация для врача
+ * обычный пользователь может попасть в эти места через ссылку, но в приложении такие ссылки не предусмотрены
+ * через Holder'ы передается нужная информация между viewModel
+ * */
 fun NavGraphBuilder.doctorNavigation(
     navController: NavHostController
 ) {

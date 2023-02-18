@@ -5,7 +5,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import java.lang.ref.WeakReference
-
+/** вспомогательный класс для хранения ссылки на viewModel,
+ * при этом viewModel следует жизненному циклу hiltViewModel
+ * */
 class SharedViewModelHolder<T: ViewModel> {
     var sharedViewModelReference = WeakReference<T>(null)
 }

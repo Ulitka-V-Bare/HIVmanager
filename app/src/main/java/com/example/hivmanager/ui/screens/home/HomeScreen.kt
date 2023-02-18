@@ -1,9 +1,12 @@
 package com.example.hivmanager.ui.screens.home
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
@@ -22,12 +25,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.example.hivmanager.R
 import com.example.hivmanager.data.model.Constants
 import com.example.hivmanager.data.model.UserData
@@ -38,6 +45,7 @@ import com.example.hivmanager.ui.screens.components.MyTopAppBar
 import com.example.hivmanager.ui.screens.components.SignOutDialog
 import com.example.hivmanager.ui.theme.HIVmanagerTheme
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import java.util.jar.Manifest
 
 
 @Composable
@@ -122,11 +130,13 @@ private fun HomeScreenUi(
                 text = "Напоминания",
                 icon = painterResource(id = R.drawable.pill)
             )
-
+            val lifecycleState = LocalLifecycleOwner.current.lifecycle.observeAsState()
+            val state = lifecycleState.value
             HomeButton(
                 onClick = onOpenNotificationChannelSettingsClick,
-                text = "Настройки уведомлений",
-                icon = Icons.Filled.Settings
+                text = if(checkIfNotificationsEnabled())"Настройки уведомлений" else "уведомления отключены",
+                icon = if(checkIfNotificationsEnabled())Icons.Filled.Settings else Icons.Filled.Warning,
+                tint = if(checkIfNotificationsEnabled()) MaterialTheme.colors.primaryVariant else MaterialTheme.colors.error
             )
 
             heightContainer(userHeight, { onConfirmEditHeightClick(it) })
@@ -134,14 +144,39 @@ private fun HomeScreenUi(
         }
     }
 }
+@Composable
+private fun checkIfNotificationsEnabled():Boolean{
+    if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU)
+        return LocalContext.current.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+    else
+        return NotificationManagerCompat.from(LocalContext.current).areNotificationsEnabled()
+}
+
+@Composable
+fun Lifecycle.observeAsState(): State<Lifecycle.Event> {
+    val state = remember { mutableStateOf(Lifecycle.Event.ON_ANY) }
+    DisposableEffect(this) {
+        val observer = LifecycleEventObserver { _, event ->
+            state.value = event
+        }
+        this@observeAsState.addObserver(observer)
+        onDispose {
+            this@observeAsState.removeObserver(observer)
+        }
+    }
+    return state
+}
 
 @Composable
 private fun HomeButton(
     modifier: Modifier = Modifier,
     text: String = "",
     onClick: () -> Unit = {},
-    icon: ImageVector = Icons.Filled.Close
+    icon: ImageVector = Icons.Filled.Close,
+    tint: Color = MaterialTheme.colors.primaryVariant
 ) {
+
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -157,7 +192,7 @@ private fun HomeButton(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colors.primaryVariant
+                tint = tint
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(text = text)

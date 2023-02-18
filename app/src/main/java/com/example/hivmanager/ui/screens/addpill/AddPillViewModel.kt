@@ -36,14 +36,19 @@ class AddPillViewModel @Inject constructor(
     val context: Context
 ) : ViewModel() {
 
-
+    /** состояние, при изменении State происходит отрисовка экрана
+     * */
     var state by mutableStateOf(AddPillState())
         private set
 
+    /** неоходимо для отправки событий навигации в composable функцию
+     * */
     private val _navigationEvent = Channel<NavigationEvent>()
     val uiEvent = _navigationEvent.receiveAsFlow()
 
 
+    /** обработка событий интерфейса
+     * */
     fun onEvent(event: AddPillEvent) {
         when (event) {
             is AddPillEvent.OnPillNameChange -> onPillNameChange(event.pillName)
@@ -54,11 +59,14 @@ class AddPillViewModel @Inject constructor(
             AddPillEvent.OnConfirmClick -> onConfirmClick()
         }
     }
-
+    /** если поле с количеством дней пустое, то выводится сообщение об этом
+     * если не пустое, то создается экземпляр pillInfo и назначаются напоминания,
+     * после чего происходит возврат на экран со списком напоминаний
+     * */
     private fun onConfirmClick() {
         viewModelScope.launch {
             if(state.pillDuration.isEmpty()){
-                Toast.makeText(context,"Длительность не должна быть пустой", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context,"Укажите количество дней", Toast.LENGTH_SHORT).show()
                 return@launch
             }
             val pillInfo = PillInfo(
@@ -73,12 +81,13 @@ class AddPillViewModel @Inject constructor(
                 pillInfo
             )
             notificationHelper.createNotificationRequest(pillInfo, scheduler)
-            _navigationEvent.send(NavigationEvent.Navigate(route = Route.pillReminder))
+            _navigationEvent.send(NavigationEvent.NavigateUp)
         }
     }
 
 
-
+    /** удаление времени напоминания из списка
+     * */
     private fun onDeletePillTimeClick(index: Int) {
         state = state.copy(
             pillTime = state.pillTime.toMutableList().let {
@@ -88,34 +97,44 @@ class AddPillViewModel @Inject constructor(
         )
 //        state.pillTime.removeAt(index)
     }
-
+    /** добавление времени напоминания в список
+     * */
     private fun onPillTimeAdded(pillTime: String) {
         state = state.copy(
             pillTime = state.pillTime.plus(pillTime)
         )
 //        state.pillTime.add(pillTime)
     }
-
+    /** изменение времени начала приема
+     * */
     private fun onPillStartChange(date: LocalDate) {
         state = state.copy(
             pillStart = date
         )
     }
 
+    /** изменение названия препарата
+     * */
     private fun onPillNameChange(pillName: String) {
         state = state.copy(
             pillName = pillName
         )
     }
 
+    /** регулярное выражение означает строки, где есть только цифры или пустые строки
+     * */
     val durationRegex = Regex("^\\d*\$")
+
+    /** изменение длительности приема препарата
+     * */
     private fun onPillDurationChange(duration: String) {
         if (duration.matches(durationRegex))
             state = state.copy(
                 pillDuration = duration
             )
     }
-
+    /** отправка навигационного события
+     * */
     fun sendNavigationEvent(event: NavigationEvent) {
         viewModelScope.launch {
             _navigationEvent.send(event)

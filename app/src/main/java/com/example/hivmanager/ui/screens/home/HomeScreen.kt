@@ -7,6 +7,7 @@ import android.provider.Settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CornerSize
@@ -34,7 +35,9 @@ import com.example.hivmanager.navigation.NavigationEvent
 import com.example.hivmanager.navigation.Route
 import com.example.hivmanager.ui.screens.components.BottomNavBar
 import com.example.hivmanager.ui.screens.components.MyTopAppBar
+import com.example.hivmanager.ui.screens.components.SignOutDialog
 import com.example.hivmanager.ui.theme.HIVmanagerTheme
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 
 
 @Composable
@@ -88,21 +91,24 @@ private fun HomeScreenUi(
     onConfirmEditHeightClick: (String) -> Unit = {},
     onSignOutClick:()->Unit = {}
 ) {
+    val dialogState = rememberMaterialDialogState()
+    SignOutDialog(dialogState = dialogState, onConfirmClick = onSignOutClick)
     Scaffold(
         topBar = { MyTopAppBar("Главная") },
         bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender, 1) },
         floatingActionButton = { FloatingActionButton(
-            onClick = onSignOutClick,
-            backgroundColor = MaterialTheme.colors.primary,
+            onClick = {dialogState.show()},
+            backgroundColor = MaterialTheme.colors.primaryVariant,
             shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 15))
         ) {
-            Text(text = "Выход",modifier = Modifier.padding(horizontal = 24.dp))
+            Text(text = "Выход",modifier = Modifier.padding(horizontal = 24.dp), color = Color.White)
         }},
         floatingActionButtonPosition = FabPosition.Center
     ) {
         Column(
             modifier = Modifier
                 .padding(it)
+                .padding(horizontal = 8.dp)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
@@ -147,6 +153,7 @@ private fun HomeButton(
             modifier = Modifier.height(48.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Spacer(modifier = Modifier.width(8.dp))
             Icon(
                 imageVector = icon,
                 contentDescription = null,
@@ -176,6 +183,7 @@ private fun HomeButton(
             modifier = Modifier.height(48.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Spacer(modifier = Modifier.width(8.dp))
             Icon(
                 painter = icon, contentDescription = null,
                 modifier = Modifier.size(24.dp),

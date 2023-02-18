@@ -181,7 +181,7 @@ private fun AddPillScreenUi(
             Text(text = "Длительность курса")
             AddPillTextField(
                 value = pillDuration,
-                onValueChange = {if(it.length in 1..3)
+                onValueChange = {if(it.length <= 3)
                     onPillDurationChange(it)},
                 label = {Text(text = "Количество дней")}
             )

@@ -15,6 +15,7 @@ class AndroidAlarmScheduler(
     /**назначение уведомления
      * */
     override fun schedule(item: AlarmItem) {
+        Log.d("AlarmManager","schedule: ${item.time} - ${item.message} -${item.hashCode()}")
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("EXTRA_MESSAGE", item.message)
         }
@@ -34,6 +35,7 @@ class AndroidAlarmScheduler(
      *  хешкоды равны, если содержимые AlarmItem равны
      * */
     override fun cancel(item: AlarmItem) {
+        Log.d("AlarmManager","cancel: ${item.time} - ${item.message} - ${item.hashCode()}")
         try {
             alarmManager.cancel(
                 PendingIntent.getBroadcast(

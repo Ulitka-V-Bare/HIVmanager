@@ -94,12 +94,14 @@ fun SignInScreenCodeSentUi(
                 append("Мы отправили код на номер ")
                 withStyle(
                     style = SpanStyle(
-                        textDecoration = TextDecoration.Underline
+                        textDecoration = TextDecoration.Underline,
+                        color = if(isSystemInDarkTheme()) Color.White else Color.Black
                     )
                 ) {
                     append("$phoneFieldValue")
                 }
             },
+            color = if(isSystemInDarkTheme()) Color.White else Color.Black,
             modifier = Modifier
                 .width(200.dp)
                 .constrainAs(textField) {
@@ -113,7 +115,7 @@ fun SignInScreenCodeSentUi(
         SignInTextField(
             value = codeFieldValue,
             onValueChange = onCodeFieldValueChange,
-            label = { Text(text = "Код подтверждения") },
+            label = { Text(text = "Код подтверждения",color = if(isSystemInDarkTheme()) Color.White else Color.Black) },
             modifier = Modifier.constrainAs(codeField) {
                 top.linkTo(parent.top, 70.dp)
                 bottom.linkTo(parent.bottom)
@@ -135,7 +137,7 @@ fun SignInScreenCodeSentUi(
                 }
         ) {
             Text(
-                text = "Войти"
+                text = "Войти",color = Color.White
             )
         }
         Column(
@@ -164,10 +166,12 @@ fun SignInScreenCodeSentUi(
                     .clickable(enabled = timerSeconds == 0) { onResendCodeButtonClick() },
                 text = text,
                 textDecoration = TextDecoration.Underline,
+                color = if(isSystemInDarkTheme()) Color.White else Color.Black
             )
             Spacer(modifier = Modifier.height(5.dp))
             Text(
                 text = " ИЛИ ",
+                color = if(isSystemInDarkTheme()) Color.White else Color.Black
             )
             Spacer(modifier = Modifier.height(5.dp))
             Text(
@@ -175,6 +179,7 @@ fun SignInScreenCodeSentUi(
                     .clickable { onChangePhoneNumberClick() },
                 text = "Ввести другой номер",
                 textDecoration = TextDecoration.Underline,
+                color = if(isSystemInDarkTheme()) Color.White else Color.Black
             )
         }
     }

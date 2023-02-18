@@ -1,5 +1,6 @@
 package com.example.hivmanager.ui.screens.components
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.MaterialTheme
@@ -35,9 +36,9 @@ fun SignInTextField(
         modifier = modifier,
         colors = TextFieldDefaults.outlinedTextFieldColors(
             unfocusedBorderColor = MaterialTheme.colors.primary,
-            focusedBorderColor = MaterialTheme.colors.primaryVariant
+            focusedBorderColor = MaterialTheme.colors.primaryVariant,
+            textColor = if(isSystemInDarkTheme()) Color.White else Color.Black
         )
-
     )
 }
 

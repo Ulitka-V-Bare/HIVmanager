@@ -1,6 +1,8 @@
 package com.example.hivmanager.ui.screens.addpill
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,6 +17,7 @@ import com.example.hivmanager.navigation.NavigationEvent
 import com.example.hivmanager.navigation.Route
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -28,7 +31,9 @@ class AddPillViewModel @Inject constructor(
     val auth: FirebaseAuth,
     val userRepository: UserRepository,
     val scheduler: AlarmScheduler,
-    val notificationHelper: NotificationHelper
+    val notificationHelper: NotificationHelper,
+    @ApplicationContext
+    val context: Context
 ) : ViewModel() {
 
 
@@ -52,6 +57,10 @@ class AddPillViewModel @Inject constructor(
 
     private fun onConfirmClick() {
         viewModelScope.launch {
+            if(state.pillDuration.isEmpty()){
+                Toast.makeText(context,"Длительность не должна быть пустой", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
             val pillInfo = PillInfo(
                 name = state.pillName,
                 startDate = DateTimeFormatter.ofPattern("dd.MM.YYYY").format(state.pillStart),

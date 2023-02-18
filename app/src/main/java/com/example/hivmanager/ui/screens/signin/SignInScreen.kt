@@ -78,29 +78,36 @@ private fun SignInScreenUi(
 
         val (phoneField, textField, button,logo) = createRefs()
         Image (
-            modifier = Modifier.width(300.dp).height(350.dp).constrainAs(logo){
-                top.linkTo(parent.top)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            },
+            modifier = Modifier
+                .width(300.dp)
+                .height(350.dp)
+                .constrainAs(logo) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
             painter = painterResource(id = if(isSystemInDarkTheme())R.drawable.logo_light else R.drawable.logo_no_background),
             contentDescription = "Big logo"
         )
         Text(
             text = "Введите ваш номер телефона, мы отправим на него СМС с кодом для входа в аккаунт",
-            modifier = Modifier.constrainAs(textField) {
-                bottom.linkTo(phoneField.top, 5.dp)
-                start.linkTo(parent.start,40.dp)
-                end.linkTo(parent.end,40.dp)
-            }.width(230.dp),
+            modifier = Modifier
+                .constrainAs(textField) {
+                    bottom.linkTo(phoneField.top, 5.dp)
+                    start.linkTo(parent.start, 40.dp)
+                    end.linkTo(parent.end, 40.dp)
+                }
+                .width(230.dp),
             style = TextStyle(
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = if(isSystemInDarkTheme()) Color.White else Color.Black
             )
         )
         SignInTextField(
             value = phoneFieldValue,
             onValueChange = onPhoneFieldValueChange,
-            label = { Text(text = "Номер телефона") },
+
+            label = { Text(text = "71234567890",color = MaterialTheme.colors.primary) },
             modifier = Modifier.constrainAs(phoneField) {
                 top.linkTo(parent.top, 70.dp)
                 bottom.linkTo(parent.bottom)
@@ -133,7 +140,8 @@ private fun SignInScreenUi(
 
                 }
             Text(
-                text = text
+                text = text,
+                color = Color.White
             )
         }
 

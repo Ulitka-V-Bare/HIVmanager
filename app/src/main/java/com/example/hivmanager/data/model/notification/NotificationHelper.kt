@@ -28,11 +28,15 @@ class NotificationHelper(val context:Context) {
          * */
     private fun createNotificationChannel(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val audioAttributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build()
             val channel = NotificationChannel(CHANNEL_ID, CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH ).apply {
                 description = "Reminder Channel Description"
             }
             channel.enableVibration(true)
             channel.setBypassDnd(true)
+            channel.vibrationPattern = longArrayOf(0, 250, 250, 250)
+            channel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,audioAttributes)
+
 
             //channel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI, AudioAttributes(AudioAttributes.USAGE_NOTIFICATION))
             val notificationManager =  context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -64,16 +68,13 @@ class NotificationHelper(val context:Context) {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setSmallIcon(R.drawable.logo_no_background)
-            .setLargeIcon(icon)
+            //  .setLargeIcon(icon)
             .setContentTitle(title)
             .setContentText(message)
-            .setStyle(
-                NotificationCompat.BigPictureStyle().bigPicture(icon).bigLargeIcon(null)
-            )
             .setContentIntent(pendingIntent)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setVibrate(DEFAULT_VIBRATE_PATTERN)
-           // .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+            .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
             .build()
         // 6
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
@@ -83,7 +84,11 @@ class NotificationHelper(val context:Context) {
      * */
     fun createNotificationRequest(pillInfo: PillInfo,scheduler:AlarmScheduler) {
         for (time in pillInfo.timeToTakePill) {
+            val date = pillInfo.startDate.split('.')
             val firstDayToNotify = LocalDateTime.now()
+                .withYear(date[2].toInt())
+                .withMonth(date[1].toInt())
+                .withDayOfMonth(date[0].toInt())
                 .withHour(time.split(':')[0].toInt())
                 .withMinute(time.split(':')[1].toInt())
                 .withSecond(0)
@@ -94,7 +99,8 @@ class NotificationHelper(val context:Context) {
                     firstDayToNotify.plusDays(i.toLong()),
                     "время принять: ${pillInfo.name}"
                 )
-                alarmItem.let(scheduler::schedule)
+                if(alarmItem.time>LocalDateTime.now())
+                    alarmItem.let(scheduler::schedule)
             }
         }
     }

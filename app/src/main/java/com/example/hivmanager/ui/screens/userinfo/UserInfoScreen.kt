@@ -7,6 +7,7 @@ import com.example.hivmanager.ui.screens.diary.DiaryEvent
 import com.example.hivmanager.ui.screens.diary.DiaryViewModel
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -80,12 +81,26 @@ fun UserInfoScreen(
 @Composable
 private fun DiaryScreenUi(
     diaryList: List<DiaryEntry> = listOf(diaryEntryExample),
+    height: Int = 180,
+    allergies:String = "",
     onBackClick:()->Unit = {}
 ) {
     Scaffold(
         topBar = { MyTopAppBar("Дневник", onBackClick = onBackClick) },
     ) {
         LazyColumn(modifier = Modifier.padding(it)) {
+            item{
+                Text(text = "Рост: $height", modifier = Modifier.padding(8.dp))
+            }
+            item{
+                var isExpanded by remember {
+                    mutableStateOf(false)
+                }
+                Text(text = "Аллергии: $allergies", modifier = Modifier
+                    .clickable { isExpanded = !isExpanded }
+                    .padding(8.dp), maxLines = if(isExpanded) Int.MAX_VALUE else 1)
+                Divider(thickness = 1.dp)
+            }
             item {
                 DiaryHeader()
             }

@@ -71,11 +71,11 @@ dependencies {
     implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
 
     //firebase firestore+auth
-    implementation platform('com.google.firebase:firebase-bom:31.2.0')
+    implementation platform('com.google.firebase:firebase-bom:31.2.2')
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation 'com.google.firebase:firebase-firestore-ktx'
-    implementation 'com.google.firebase:firebase-database-ktx:20.1.0'
-    implementation 'com.google.firebase:firebase-storage-ktx:20.1.0'
+    implementation 'com.google.firebase:firebase-database-ktx'
+    implementation 'com.google.firebase:firebase-storage-ktx'
 
     //constraint layout
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"

@@ -133,7 +133,7 @@ private fun ChatNowAvailableUi(
             .padding(it)
             .fillMaxSize(),
         contentAlignment = Alignment.Center) {
-            Column() {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "Мы еще не прикрепили вас ко врачу, обратитесь по адресу",
                     modifier = Modifier.width(200.dp),
@@ -242,6 +242,9 @@ private fun ChatScreenUi(
                     state = lazyListState,
                     reverseLayout = true
                 ) {
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                     itemsIndexed(messageList) { index, message ->
                         Row(
                             horizontalArrangement = if (message.sender == userID) Arrangement.End else Arrangement.Start,

@@ -1,6 +1,7 @@
 package com.example.hivmanager.ui.screens.doctorhome
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -11,6 +12,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -22,8 +24,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.hivmanager.navigation.NavigationEvent
 import com.example.hivmanager.ui.screens.components.MyTopAppBar
+import com.example.hivmanager.ui.screens.components.SignOutDialog
 import com.example.hivmanager.ui.screens.home.HomeViewModel
 import com.example.hivmanager.ui.theme.HIVmanagerTheme
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 
 @Composable
 fun DoctorHomeScreen(
@@ -57,14 +61,17 @@ fun DoctorHomeScreenUi(
     onUserInfoClick: (String)->Unit = {},
     onSignOutClick: ()->Unit = {}
 ) {
+    val dialogState = rememberMaterialDialogState()
+    SignOutDialog(dialogState = dialogState,
+    onConfirmClick = onSignOutClick)
     Scaffold(
         topBar = { MyTopAppBar("Пациенты") },
         floatingActionButton = { FloatingActionButton(
-            onClick = onSignOutClick,
-            backgroundColor = MaterialTheme.colors.primary,
+            onClick = {dialogState.show()},
+            backgroundColor = MaterialTheme.colors.primaryVariant,
             shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 15))
         ) {
-            Text(text = "Выход",modifier = Modifier.padding(horizontal = 24.dp))
+            Text(text = "Выход",modifier = Modifier.padding(horizontal = 24.dp),color =  Color.White )
         }},
         floatingActionButtonPosition = FabPosition.Center
     ) {

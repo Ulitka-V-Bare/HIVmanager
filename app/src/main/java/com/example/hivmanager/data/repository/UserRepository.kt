@@ -75,7 +75,7 @@ class UserRepository @Inject constructor(
             val result = firestore.collection("users").document(uid).get().await()
             return constructUserDataFromFirestore(result)
         }catch (e:Exception){
-            Toast.makeText(context,"${e.message}",Toast.LENGTH_LONG).show()
+        //    Toast.makeText(context,"${e.message}",Toast.LENGTH_LONG).show()
             return UserData()
         }
     }

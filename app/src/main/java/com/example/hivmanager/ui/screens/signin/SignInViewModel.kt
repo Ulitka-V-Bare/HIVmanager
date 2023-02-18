@@ -163,7 +163,7 @@ class SignInViewModel @Inject constructor(
                     viewModelScope.launch {
                         userRepository.addUserToDatabase(auth.uid)
                         userRepository.onSignIn(auth.uid!!)
-                        _navigationEvent.send(NavigationEvent.Navigate(Route.home,true))
+                        _navigationEvent.send(NavigationEvent.Navigate(Route.splash,true))
                     }
                     Toast.makeText(context,"Successfully signed in",Toast.LENGTH_SHORT).show()
                     //val user = task.result?.user

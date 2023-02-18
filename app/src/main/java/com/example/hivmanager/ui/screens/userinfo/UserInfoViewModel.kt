@@ -27,6 +27,11 @@ class UserInfoViewModel @Inject constructor(
     var userData by mutableStateOf(UserData())
         private set
 
+    /** при инициализации загрузка данных нужного пользователя из базы,
+     * delay нужен, чтобы данные patientID из графа навигации, так как это происходит не мгновенно
+     * сначала инициализируется без данных об айди, затем начинается delay в 50 миллисекунд, в течение которого
+     * должны прийти данные
+     */
     init{
         viewModelScope.launch {
             while(patientID=="") {

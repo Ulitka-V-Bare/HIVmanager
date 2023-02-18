@@ -30,13 +30,17 @@ class SplashViewModel @Inject constructor(
             SplashEvent.OnSplashScreenLaunched -> onSplashScreenLaunched()
         }
     }
+
+    /** при запуске происходит загрузка данных из базы и перенапраление на Home или DoctorHome,
+     * в зависимости от типа пользователя.
+     * Также при запуске в базу откравляются текущие локальные данные пользователя
+     * для обеспечения синхронизации
+     */
     private fun onSplashScreenLaunched(){
         viewModelScope.launch{
             delay(500)
-          //  auth.signOut()
-            auth.firebaseAuthSettings.setAppVerificationDisabledForTesting(true)
-
-
+            //  auth.signOut()
+            //auth.firebaseAuthSettings.setAppVerificationDisabledForTesting(true)
             try{
                 auth.currentUser?.reload()
             }catch (e:FirebaseAuthInvalidUserException){

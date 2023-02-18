@@ -18,7 +18,9 @@ class InfoViewModel @Inject constructor(
 
     private val _navigationEvent = Channel<NavigationEvent>()
     val uiEvent = _navigationEvent.receiveAsFlow()
-
+    /***
+     * отправка события навигации
+     */
     fun sendNavigationEvent(event: NavigationEvent){
         viewModelScope.launch {
             _navigationEvent.send(event)

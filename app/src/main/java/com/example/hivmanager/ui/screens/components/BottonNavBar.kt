@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import com.example.hivmanager.navigation.NavigationEvent
 import com.example.hivmanager.navigation.Route
 
+/** меню навигации, для работы необходимо отправить функцию, которая обрабатывает события навигации
+ * */
 @Preview
 @Composable
 fun BottomNavBar(

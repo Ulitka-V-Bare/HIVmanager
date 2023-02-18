@@ -128,7 +128,7 @@ class AddPillViewModel @Inject constructor(
     /** изменение длительности приема препарата
      * */
     private fun onPillDurationChange(duration: String) {
-        if (duration.matches(durationRegex))
+        if (duration.matches(durationRegex) && duration!="0")
             state = state.copy(
                 pillDuration = duration
             )

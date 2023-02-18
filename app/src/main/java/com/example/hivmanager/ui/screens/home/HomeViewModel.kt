@@ -29,7 +29,9 @@ class HomeViewModel  @Inject constructor(
     private val _navigationEvent = Channel<NavigationEvent>()
     val uiEvent = _navigationEvent.receiveAsFlow()
 
-
+    /***
+     * обработка внешнего события
+     */
     fun onEvent(event: HomeEvent) {
         when (event) {
             is HomeEvent.OnConfirmEditAllergiesClick -> onConfirmEditAllergiesClick(event.allergies)
@@ -37,24 +39,28 @@ class HomeViewModel  @Inject constructor(
             HomeEvent.OnSignOutClick -> onSignOutClick()
         }
     }
-
+    /***
+     * выход из аккаунта
+     */
     private fun onSignOutClick(){
         viewModelScope.launch {
             userRepository.onSignOut()
             _navigationEvent.send(NavigationEvent.Navigate(Route.splash,true))
         }
     }
-
+    /***
+     * сохраняем рост локально и в базу
+     */
 
     private fun onConfirmEditHeightClick(height:String){
-//        state = state.copy(
-//            height = if(height.isEmpty()) 0 else height.toInt()
-//        )
         viewModelScope.launch {
             userRepository.setHeight(if(height.isEmpty()) 0 else height.toInt())
         }
     }
 
+    /***
+     * сохраняем аллергии локально и в базу
+     */
     private fun onConfirmEditAllergiesClick(allergies:String){
 //        state = state.copy(
 //            allergies = allergies
@@ -63,6 +69,9 @@ class HomeViewModel  @Inject constructor(
             userRepository.setAllergies(allergies)
         }
     }
+    /***
+     * отправка события навигации
+     */
     fun sendNavigationEvent(event:NavigationEvent){
         viewModelScope.launch {
             _navigationEvent.send(event)

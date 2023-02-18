@@ -31,26 +31,34 @@ class DiaryViewModel @Inject constructor(
     val uiEvent = _navigationEvent.receiveAsFlow()
 
 
-
+    /***
+     * обработка внешнего события
+     */
     fun onEvent(event: DiaryEvent) {
         when (event) {
             is DiaryEvent.OnAddDiaryEntryClick -> addDiaryEntry(event.diaryEntry)
             is DiaryEvent.OnDeleteDiaryEntryClick -> deleteDiaryEntry(event.diaryEntry)
         }
     }
-
+    /***
+     * отправление события навигации
+     */
     fun sendNavigationEvent(event: NavigationEvent){
         viewModelScope.launch {
             _navigationEvent.send(event)
         }
     }
-
+    /***
+     * добавление записи в дневник
+     */
     private fun addDiaryEntry(diaryEntry: DiaryEntry){
         viewModelScope.launch {
             userRepository.addDiaryEntry(diaryEntry)
         }
     }
-
+    /***
+     * удаление записи из дневника
+     */
     private fun deleteDiaryEntry(diaryEntry: DiaryEntry){
         viewModelScope.launch {
             userRepository.deleteDiaryEntry(diaryEntry)

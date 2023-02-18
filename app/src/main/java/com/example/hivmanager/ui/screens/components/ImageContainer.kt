@@ -20,6 +20,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 
+/** контейнер для изображения, используется в чате,
+ * две версии для приема ImageBitmap, если изображение скачано, и painter, если локальное
+ * */
 @Composable
 fun ImageContainer(
     imageBitmap: ImageBitmap,

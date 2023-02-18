@@ -44,7 +44,9 @@ class MyPillsViewModel @Inject constructor(
             is MyPillsEvent.OnDeletePillInfoClick ->onDeletePillInfoClick(event.index)
         }
     }
-
+    /***
+     * удаление записи о напоминании и отключение всех запланированных уведомлений, связанных с ним
+     */
     private fun onDeletePillInfoClick(index:Int){
         viewModelScope.launch {
             Log.d("cancelPill","before cancelNotification")
@@ -53,11 +55,16 @@ class MyPillsViewModel @Inject constructor(
             userRepository.deletePillInfo(index)
         }
     }
-
+    /***
+     * переход на страницу добавления напоминания
+     */
 
     private fun onAddNewPillInfoClick(){
         sendNavigationEvent(NavigationEvent.Navigate(Route.addPill))
     }
+    /***
+     * отправка события навигации
+     */
     fun sendNavigationEvent(event: NavigationEvent){
         viewModelScope.launch {
             _navigationEvent.send(event)

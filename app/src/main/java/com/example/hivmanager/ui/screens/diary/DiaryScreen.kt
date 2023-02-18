@@ -44,6 +44,9 @@ import kotlinx.coroutines.flow.asFlow
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+/***
+ * экран дневника наблюдений
+ */
 @Composable
 fun DiaryScreen(
     onNavigate: (route: String, popBackStack: Boolean) -> Unit,
@@ -128,7 +131,9 @@ private fun AddEntryTextField(
         keyboardOptions = keyboardOptions
     )
 }
-
+/***
+ * функционал для добавления записи в дневник
+ */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun AddEntry(
@@ -315,7 +320,9 @@ private fun DiaryHeader() {
         }
     }
 }
-
+/***
+ * хранит запись в дневнике
+ */
 @Composable
 private fun DiaryEntryContainer(
     diaryEntry: DiaryEntry = diaryEntryExample,
@@ -408,7 +415,9 @@ private fun DiaryEntryContainer(
         }
     }
 }
-
+/***
+ * хранит комментарий записи в дневнике, который открывается по нажатию
+ */
 @Composable
 private fun commentHolder(comment: String = "my comment") {
     var isExpanded by remember { mutableStateOf(false) }

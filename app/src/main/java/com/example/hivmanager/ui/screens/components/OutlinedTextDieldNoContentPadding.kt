@@ -20,6 +20,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
+/***
+ * Версия OutlinedTextField без внутренних отступов, используется в DiaryScreen
+ */
 @Composable
 fun OutlinedTextFieldNoContentPadding(
     value: String,

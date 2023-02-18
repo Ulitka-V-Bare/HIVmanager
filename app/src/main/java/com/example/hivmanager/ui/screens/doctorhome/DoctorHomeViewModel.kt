@@ -29,6 +29,9 @@ class DoctorHomeViewModel @Inject constructor(
     private val _navigationEvent = Channel<NavigationEvent>()
     val uiEvent = _navigationEvent.receiveAsFlow()
 
+    /***
+     * при инициализации запрашиваем из базы последние сообщения всех чатов
+     */
     init {
         userRepository.loadLastMessages(viewModelScope) { patient, message ->
             addMessageToMap(
@@ -37,25 +40,35 @@ class DoctorHomeViewModel @Inject constructor(
             )
         }
     }
+    /***
+     * выход из аккаунта
+     */
     fun onSignOutClick(){
         viewModelScope.launch {
             userRepository.onSignOut()
             _navigationEvent.send(NavigationEvent.Navigate(Route.splash,true))
         }
     }
+    /***
+     * добавляет сообщение в Map
+     */
     private fun addMessageToMap(patient:String,message:String){
         state = state.copy(
             messages = state.messages.plus(patient to message)
         )
     }
-
+    /***
+     * перенаправление в чат с пользователем
+     */
     fun navigateToChat(userID:String){
         state = state.copy(patientID = userID)
         viewModelScope.launch {
             _navigationEvent.send(NavigationEvent.Navigate(Route.doctorChat))
         }
     }
-
+    /***
+     * перенаправление в информацию о пользователе
+     */
     fun navigateToInfo(userID:String){
         state = state.copy(patientID = userID)
         viewModelScope.launch {

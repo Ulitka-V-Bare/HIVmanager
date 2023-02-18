@@ -119,7 +119,9 @@ fun DeletePillDialog(
         )
     }
 }
-
+/***
+ * отображает информацию о напоминании pillInfo
+ */
 @Composable
 fun MyPillCard(
     pillInfo: PillInfo = PillInfo_example,

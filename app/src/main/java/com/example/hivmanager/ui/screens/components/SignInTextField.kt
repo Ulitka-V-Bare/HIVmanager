@@ -15,6 +15,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 
+/***
+ * поле для текста, при нажатии enter автоматически закрывается, если не указано иное
+ */
 @Composable
 fun SignInTextField(
     value:String,

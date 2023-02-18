@@ -17,6 +17,10 @@ import coil.request.ImageRequest
 import coil.size.Size
 import com.example.hivmanager.R
 
+/***
+ * гифка загрузки в чате
+ */
+
 @Composable
 fun LoadingGif(
     modifier: Modifier = Modifier,

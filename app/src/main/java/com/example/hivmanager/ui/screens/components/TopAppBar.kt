@@ -15,7 +15,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.hivmanager.R
-
+/***
+ * верхнее меню, если передана функция onBackClick, то отображается кнопка слева, она должна вести на предыдущий экран
+ */
 @Preview
 @Composable
 fun MyTopAppBar(header:String = "Header", modifier: Modifier = Modifier, onBackClick: (()->Unit)? = null) {

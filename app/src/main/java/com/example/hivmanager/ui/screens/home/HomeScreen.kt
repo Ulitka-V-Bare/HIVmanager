@@ -64,6 +64,9 @@ fun HomeScreen(
             }
         }
     }
+    /***
+     * перенапрявляет в настройки уведомлений этого приложения
+     */
     fun openNotificationChannelSettings(context: Context) {
         val intent: Intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
             .putExtra(Settings.EXTRA_APP_PACKAGE, context.getPackageName())
@@ -130,8 +133,13 @@ private fun HomeScreenUi(
                 text = "Напоминания",
                 icon = painterResource(id = R.drawable.pill)
             )
+            /***
+             * lifecycleState и state необходимы для рекомпозиции при изменении состояния цикла,
+             * в данном случае, чтобы перерисовывать экран после перехода из настроек оповещений обратно
+             * на HomeScreen
+             */
             val lifecycleState = LocalLifecycleOwner.current.lifecycle.observeAsState()
-            val state = lifecycleState.value
+            val state = lifecycleState.value //нигде не используется, но не удалять!
             HomeButton(
                 onClick = onOpenNotificationChannelSettingsClick,
                 text = if(checkIfNotificationsEnabled())"Настройки уведомлений" else "уведомления отключены",
@@ -152,6 +160,9 @@ private fun checkIfNotificationsEnabled():Boolean{
         return NotificationManagerCompat.from(LocalContext.current).areNotificationsEnabled()
 }
 
+/**
+ * вспомогательная функция для наблюдения за жизненным циклом
+ */
 @Composable
 fun Lifecycle.observeAsState(): State<Lifecycle.Event> {
     val state = remember { mutableStateOf(Lifecycle.Event.ON_ANY) }

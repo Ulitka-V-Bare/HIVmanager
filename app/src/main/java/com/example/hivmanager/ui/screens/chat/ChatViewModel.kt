@@ -52,8 +52,7 @@ class ChatViewModel  @Inject constructor(
     private val _navigationEvent = Channel<NavigationEvent>()
     val uiEvent = _navigationEvent.receiveAsFlow()
 
-    /** при получении или отправке сообщения колонка с сообщениями листается вниз
-     * */
+
 
     var patientID:String? = null
 
@@ -63,7 +62,11 @@ class ChatViewModel  @Inject constructor(
      * */
     init {
         viewModelScope.launch {
-            delay(100)
+            if(userRepository.userType=="doctor"){
+                while(patientID==null){
+                    delay(25)
+                }
+            }
             chatID = if(patientID==null) "${auth.uid}${userRepository.userDoctorID}" else "${patientID}${auth.uid}"
             userRepository.getMessageList( chatID,{ onGetData(it) })
         }

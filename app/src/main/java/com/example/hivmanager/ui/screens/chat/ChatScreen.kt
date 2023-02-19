@@ -138,7 +138,7 @@ private fun ChatNowAvailableUi(
         contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "Мы еще не прикрепили вас ко врачу, обратитесь по адресу",
+                    text = "Мы еще не прикрепили вас ко врачу, обратитесь по адресу aibataginbaev@gmail.com",
                     modifier = Modifier.width(200.dp),
                     textAlign = TextAlign.Center,
                     fontSize = 20.sp

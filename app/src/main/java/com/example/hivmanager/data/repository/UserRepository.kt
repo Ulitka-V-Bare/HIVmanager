@@ -175,8 +175,7 @@ class UserRepository @Inject constructor(
             if(task.result.exists()) ifExists=true
             if(!ifExists) {
                 firestore.collection(Constants.USERS).document(uid).set(
-                    mapOf("type" to "user","doctor" to "null"),
-
+                    mapOf("type" to "user","doctor" to "null","uid" to auth.uid),
                     SetOptions.merge()
                 )
             }

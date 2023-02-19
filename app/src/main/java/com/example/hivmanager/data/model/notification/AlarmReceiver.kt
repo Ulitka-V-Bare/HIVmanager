@@ -37,15 +37,6 @@ class AlarmReceiver: BroadcastReceiver() {
             Log.d("receiver","notification sent")
         }catch (e:Exception){
             Log.d("receiver","${e.message}")
-            if(context!=null) {
-                val intent = Intent(Intent.ACTION_SEND)
-                    .setData(Uri.parse("mailto:"))
-                    .putExtra(Intent.EXTRA_EMAIL,"kuzevanovii@inbox.ru")
-                    .putExtra(Intent.EXTRA_TEXT, "${e.message}\n\n" +
-                            "${e.stackTrace}\n\n" +
-                            "${e.cause}" )
-                context.startActivity(Intent.createChooser(intent,"send error via:").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            }
         }
 
     }

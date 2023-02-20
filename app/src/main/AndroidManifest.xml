@@ -31,7 +31,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name="com.example.hivmanager.data.model.notification.AlarmReceiver" />
+        <receiver android:name="com.saqtan.saqtan.data.model.notification.AlarmReceiver" />
     </application>
 
 </manifest>

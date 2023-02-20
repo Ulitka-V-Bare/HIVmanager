@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.hivmanager'
+    namespace 'com.saqtan.saqtan'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.hivmanager"
+        applicationId "com.saqtan.saqtan"
         minSdk 26
         targetSdk 33
         versionCode 1

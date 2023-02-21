@@ -45,7 +45,9 @@ fun UserInfoScreen(
     }
     DiaryScreenUi(
         diaryList = viewModel.userData.diaryEntries,
-        onBackClick = {viewModel.sendNavigationEvent(NavigationEvent.NavigateUp)}
+        onBackClick = {viewModel.sendNavigationEvent(NavigationEvent.NavigateUp)},
+        height = viewModel.userData.height,
+        allergies = viewModel.userData.allergies
     )
 }
 
@@ -70,7 +72,10 @@ private fun DiaryScreenUi(
                 var isExpanded by remember {
                     mutableStateOf(false)
                 }
-                Text(text = "Аллергиялық аурулары: $allergies", modifier = Modifier
+                val allergiesSubstring = if(allergies.length<=10) allergies else  allergies.substring(0,7)
+                val text = if(isExpanded)"Аллергиялық аурулары: $allergies" else
+                    "Аллергиялық аурулары: $allergiesSubstring..."
+                Text(text = text, modifier = Modifier
                     .clickable { isExpanded = !isExpanded }
                     .padding(8.dp), maxLines = if(isExpanded) Int.MAX_VALUE else 1)
                 Divider(thickness = 1.dp)

@@ -96,14 +96,14 @@ private fun HomeScreenUi(
     val dialogState = rememberMaterialDialogState()
     SignOutDialog(dialogState = dialogState, onConfirmClick = onSignOutClick)
     Scaffold(
-        topBar = { MyTopAppBar("Главная") },
+        topBar = { MyTopAppBar("Басты бет") },
         bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender, 1) },
         floatingActionButton = { FloatingActionButton(
             onClick = {dialogState.show()},
             backgroundColor = MaterialTheme.colors.primaryVariant,
             shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 15))
         ) {
-            Text(text = "Выход",modifier = Modifier.padding(horizontal = 24.dp), color = Color.White)
+            Text(text = "Шығу",modifier = Modifier.padding(horizontal = 24.dp), color = Color.White)
         }},
         floatingActionButtonPosition = FabPosition.Center
     ) {
@@ -116,12 +116,12 @@ private fun HomeScreenUi(
         ) {
             HomeButton(
                 onClick = onOpenDiaryClick,
-                text = "Дневник",
+                text = "Күнделік",
                 icon = Icons.Filled.EditNote
             )
             HomeButton(
                 onClick = onOpenPillListClick,
-                text = "Напоминания",
+                text = "Менің ескертулерім",
                 icon = painterResource(id = R.drawable.pill)
             )
             /***
@@ -133,7 +133,7 @@ private fun HomeScreenUi(
             val state = lifecycleState.value //нигде не используется, но не удалять!
             HomeButton(
                 onClick = onOpenNotificationChannelSettingsClick,
-                text = if(checkIfNotificationsEnabled())"Настройки уведомлений" else "уведомления отключены",
+                text = if(checkIfNotificationsEnabled())"Eскертулер баптаулары" else "Eскертулер өшіп тұр",
                 icon = if(checkIfNotificationsEnabled())Icons.Filled.Settings else Icons.Filled.Warning,
                 tint = if(checkIfNotificationsEnabled()) MaterialTheme.colors.primaryVariant else MaterialTheme.colors.error
             )
@@ -243,34 +243,33 @@ private fun allergiesContainer(
 
     if (!isEditingHeight) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-            Text(
-                text = "Мои аллергии: ",
-            )
-            Text(
-                text = userAllergies,
-                //text = "adfskjlaksdfj;lkadjkldaj;sd; asdfask;fd;ls",
-                modifier = Modifier.widthIn(max = 230.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            IconButton(
-                onClick = { isEditingHeight = true },
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription = "edit height button",
-                    modifier = Modifier.size(24.dp)
+            Column(modifier = Modifier.weight(5f)) {
+                Text(
+                    text = "Менің аллергияларым: $userAllergies,",
+                    modifier = Modifier.fillMaxWidth().padding(end = 8.dp)
                 )
             }
+            Column(modifier = Modifier.weight(1f)) {
+                IconButton(
+                    onClick = { isEditingHeight = true },
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = "edit height button",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
         }
 
     } else {
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Top
         ) {
             Text(
-                text = "Мои аллергии: ",
+                text = "Менің аллергияларым: ",
             )
             var tempAllergies by remember { mutableStateOf(userAllergies) }
             TextField(
@@ -321,7 +320,7 @@ private fun heightContainer(
     ) {
         var isEditingHeight by remember { mutableStateOf(false) }
         Text(
-            text = "Мой рост: ",
+            text = "Менің бой өлшемім: ",
         )
         if (!isEditingHeight) {
             Text(

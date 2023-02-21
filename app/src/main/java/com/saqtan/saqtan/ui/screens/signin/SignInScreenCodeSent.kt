@@ -1,5 +1,6 @@
 package com.saqtan.saqtan.ui.screens.signin
 
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -46,9 +48,11 @@ fun SignInScreenCodeSent(
         }
     }
 
+    val activity = LocalContext.current as Activity
+
     SignInScreenCodeSentUi(
         phoneFieldValue = viewModel.state.phoneNumber,
-        onResendCodeButtonClick = {viewModel.onEvent(SignInEvent.OnResendCodeButtonClick)},
+        onResendCodeButtonClick = {viewModel.onEvent(SignInEvent.OnResendCodeButtonClick(activity))},
         onSignInButtonClick = {viewModel.onEvent(SignInEvent.OnSignInButtonClick)},
         onChangePhoneNumberClick = {viewModel.onEvent(SignInEvent.OnChangePhoneNumberClick)},
         codeFieldValue = viewModel.state.code,
@@ -88,7 +92,7 @@ fun SignInScreenCodeSentUi(
         )
         Text(
             text = buildAnnotatedString {
-                append("Мы отправили код на номер ")
+                append("Біз ")
                 withStyle(
                     style = SpanStyle(
                         textDecoration = TextDecoration.Underline,
@@ -97,6 +101,7 @@ fun SignInScreenCodeSentUi(
                 ) {
                     append("$phoneFieldValue")
                 }
+                append(" осы номерге смс код жібердік")
             },
             color = if(isSystemInDarkTheme()) Color.White else Color.Black,
             modifier = Modifier
@@ -112,7 +117,7 @@ fun SignInScreenCodeSentUi(
         SignInTextField(
             value = codeFieldValue,
             onValueChange = onCodeFieldValueChange,
-            label = { Text(text = "Код подтверждения",color = if(isSystemInDarkTheme()) Color.White else Color.Black) },
+            label = { Text(text = "Растау коды",color = if(isSystemInDarkTheme()) Color.White else Color.Black) },
             modifier = Modifier.constrainAs(codeField) {
                 top.linkTo(parent.top, 70.dp)
                 bottom.linkTo(parent.bottom)
@@ -134,7 +139,7 @@ fun SignInScreenCodeSentUi(
                 }
         ) {
             Text(
-                text = "Войти",color = Color.White
+                text = "Кіру",color = Color.White
             )
         }
         Column(
@@ -148,13 +153,13 @@ fun SignInScreenCodeSentUi(
         ) {
             val text =
                 if (timerSeconds == 0)
-                    "Отправить снова"
+                    "Кодты қайтадан жіберу"
                 else {
                     when (timerSeconds) {
-                        60 -> "Отправить снова(1:00)"
-                        in 10..59 -> "Отправить снова(0:${timerSeconds})"
-                        in 1..9 -> "Отправить снова(0:0${timerSeconds})"
-                        else -> "Отправить снова"
+                        60 -> "Кодты қайтадан жіберу(1:00)"
+                        in 10..59 -> "Кодты қайтадан жіберу(0:${timerSeconds})"
+                        in 1..9 -> "Кодты қайтадан жіберу(0:0${timerSeconds})"
+                        else -> "Кодты қайтадан жіберу"
                     }
 
                 }
@@ -167,14 +172,14 @@ fun SignInScreenCodeSentUi(
             )
             Spacer(modifier = Modifier.height(5.dp))
             Text(
-                text = " ИЛИ ",
+                text = " немесе ".uppercase(),
                 color = if(isSystemInDarkTheme()) Color.White else Color.Black
             )
             Spacer(modifier = Modifier.height(5.dp))
             Text(
                 modifier = Modifier
                     .clickable { onChangePhoneNumberClick() },
-                text = "Ввести другой номер",
+                text = "Басқа номер енгізу",
                 textDecoration = TextDecoration.Underline,
                 color = if(isSystemInDarkTheme()) Color.White else Color.Black
             )

@@ -59,7 +59,7 @@ class SignInViewModel @Inject constructor(
     fun onEvent(event: SignInEvent) {
         when (event) {
             SignInEvent.OnSignInButtonClick -> onSignInButtonClick()
-            SignInEvent.OnResendCodeButtonClick ->{}
+            is SignInEvent.OnResendCodeButtonClick -> onSendCodeButtonClick(event.activity)
             is SignInEvent.OnSendCodeButtonClick -> onSendCodeButtonClick(event.activity)
             is SignInEvent.OnCodeChange -> onCodeChanged(event.code)
             is SignInEvent.OnPhoneNumberChange -> onPhoneNumberChanged(event.phoneNumber)

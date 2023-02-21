@@ -70,7 +70,7 @@ private fun MyPillsScreenUi(
 ){
 
     Scaffold(
-        topBar = { MyTopAppBar("Мои напоминания",onBackClick = onBackClick) },
+        topBar = { MyTopAppBar("Менің ескертулерім",onBackClick = onBackClick) },
         bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender) },
         floatingActionButton = { MyFloatingActionButton(onClick = onAddNewPillClick)}
     ) {
@@ -101,12 +101,12 @@ fun DeletePillDialog(
             dismissOnClickOutside = true,
         ),
         buttons = {
-            positiveButton(text = "ОК", onClick = onConfirmClick)
-            negativeButton(text = "Отмена")
+            positiveButton(text = "Cақтау", onClick = onConfirmClick)
+            negativeButton(text = "Болдырмау")
         }
     ) {
         Text(
-            text= "Вы уверены, что хотите удалить это напоминание?",
+            text= "Бұл ескертуді жоюға сенімдісіз бе?",
             modifier = Modifier.padding(16.dp),
             textAlign = TextAlign.Center
         )
@@ -160,12 +160,12 @@ fun MyPillCard(
                 }
                 Text(
                     text = buildAnnotatedString {
-                        append("Время приема: ")
+                        append("Қабылдау уақыты: ")
                         for(time in pillInfo.timeToTakePill) append("$time ")
                     }
                 )
-                Text(text = "Начало: ${pillInfo.startDate}")
-                Text(text = "Конец: ${pillInfo.finishDate}")
+                Text(text = "Бастау кезі: ${pillInfo.startDate}")
+                Text(text = "Соңы: ${pillInfo.finishDate}")
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }

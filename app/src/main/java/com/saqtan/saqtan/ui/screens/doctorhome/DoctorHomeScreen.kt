@@ -61,13 +61,13 @@ fun DoctorHomeScreenUi(
     SignOutDialog(dialogState = dialogState,
     onConfirmClick = onSignOutClick)
     Scaffold(
-        topBar = { MyTopAppBar("Пациенты") },
+        topBar = { MyTopAppBar("Науқастар") },
         floatingActionButton = { FloatingActionButton(
             onClick = {dialogState.show()},
             backgroundColor = MaterialTheme.colors.primaryVariant,
             shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 15))
         ) {
-            Text(text = "Выход",modifier = Modifier.padding(horizontal = 24.dp),color =  Color.White )
+            Text(text = "Шығу",modifier = Modifier.padding(horizontal = 24.dp),color =  Color.White )
         }},
         floatingActionButtonPosition = FabPosition.Center
     ) {

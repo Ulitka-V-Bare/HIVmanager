@@ -100,7 +100,7 @@ class NotificationHelper(val context:Context) {
             for (i in 0 until pillInfo.duration) {
                 val alarmItem = AlarmItem(
                     firstDayToNotify.plusDays(i.toLong()),
-                    "время принять: ${pillInfo.name}"
+                    "Қабылдайтын уақыт: ${pillInfo.name}"
                 )
                 if(alarmItem.time>LocalDateTime.now())
                     alarmItem.let(scheduler::schedule)

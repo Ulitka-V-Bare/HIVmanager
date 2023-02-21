@@ -22,12 +22,12 @@ fun SignOutDialog(
             dismissOnClickOutside = true,
         ),
         buttons = {
-            positiveButton(text = "ОК", onClick = onConfirmClick)
-            negativeButton(text = "Отмена")
+            positiveButton(text = "Cақтау", onClick = onConfirmClick)
+            negativeButton(text = "Болдырмау")
         }
     ) {
         Text(
-            text= "Вы уверены, что хотите выйти?",
+            text= "Сіз шыққыңыз келетініне сенімдісіз бе?",
             modifier = Modifier.padding(16.dp),
             textAlign = TextAlign.Center
         )

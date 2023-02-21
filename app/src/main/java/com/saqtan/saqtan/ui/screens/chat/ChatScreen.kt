@@ -95,7 +95,10 @@ fun ChatScreen(
      * */
     if((viewModel.userRepository.userDoctorID!="null"&&viewModel.userRepository.userDoctorID.isNotEmpty()) || viewModel.userRepository.userType=="doctor" )
         ChatScreenUi(
-            navigationEventSender = { viewModel.sendNavigationEvent(it) },
+            navigationEventSender = {
+                activity.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED)
+                viewModel.sendNavigationEvent(it)
+                                    },
             textFieldValue = viewModel.state.message,
             onTextFieldValueChange = { viewModel.onEvent(ChatEvent.OnMessageValueChange(it)) },
             onSendMessageButtonClick = { viewModel.onEvent(ChatEvent.OnSendMessageButtonClick) },
@@ -127,7 +130,7 @@ private fun ChatNowAvailableUi(
     onReloadClick: ()->Unit = {}
 ){
     Scaffold(
-        topBar = { MyTopAppBar("Чат")},
+        topBar = { MyTopAppBar("Хабарламалар")},
         bottomBar = {
                 BottomNavBar(bottomNavBarNavigationEventSender, 2)
         }
@@ -138,13 +141,13 @@ private fun ChatNowAvailableUi(
         contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "Мы еще не прикрепили вас ко врачу, обратитесь по адресу aibataginbaev@gmail.com",
+                    text = "Біз әлі сізді дәрігерге тіркемедік, \"aibataginbaev@gmail.com\" бойынша хабарласыңыз",
                     modifier = Modifier.width(200.dp),
                     textAlign = TextAlign.Center,
                     fontSize = 20.sp
                 )
                 TextButton(onClick = onReloadClick) {
-                    Text(text = "Обновить", textDecoration = TextDecoration.Underline, color = MaterialTheme.colors.primary)
+                    Text(text = "Жаңарту", textDecoration = TextDecoration.Underline, color = MaterialTheme.colors.primary)
                 }
             }
         }
@@ -172,9 +175,9 @@ private fun ChatScreenUi(
     Scaffold(
         topBar = {
             if(!isDoctor)
-                MyTopAppBar("Чат")
+                MyTopAppBar("Хабарламалар")
             else
-                MyTopAppBar("Чат", onBackClick = {navigationEventSender(NavigationEvent.NavigateUp)})
+                MyTopAppBar("Хабарламалар", onBackClick = {navigationEventSender(NavigationEvent.NavigateUp)})
                  },
         bottomBar = {
             Column() {
@@ -216,7 +219,7 @@ private fun ChatScreenUi(
                                 )
                             }
                         },
-                        placeholder = {Text(text = "Ваше сообщение...")}
+                        placeholder = {Text(text = "Сіздің хабарлама...")}
                     )
                 }
                 if(!isDoctor) {

@@ -82,7 +82,7 @@ private fun DiaryScreenUi(
     onBackClick:()->Unit = {}
 ) {
     Scaffold(
-        topBar = { MyTopAppBar("Дневник", onBackClick = onBackClick) },
+        topBar = { MyTopAppBar("Күнделік", onBackClick = onBackClick) },
         bottomBar = { BottomNavBar({ bottomNavBarNavigationEventSender(it) }) }
     ) {
         LazyColumn(modifier = Modifier.padding(it)) {
@@ -243,7 +243,7 @@ private fun AddEntry(
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .focusRequester(commentField),
-                placeholder = { Text(text = "Комментарий...") },
+                placeholder = { Text(text = "Пікірлер...") },
             )
         }
     }
@@ -253,7 +253,7 @@ private fun AddEntry(
                 onClick = { clear() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Очистить")
+                Text(text = "Тазалау")
             }
         }
         Column(modifier = Modifier.weight(1f)) {
@@ -275,7 +275,7 @@ private fun AddEntry(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Добавить")
+                Text(text = "Қосу")
             }
         }
     }
@@ -424,7 +424,7 @@ private fun commentHolder(comment: String = "my comment") {
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Комментарий", modifier = Modifier.padding(start = 8.dp))
+            Text(text = "Пікірлер", modifier = Modifier.padding(start = 8.dp))
             IconButton(onClick = { isExpanded = !isExpanded }) {
                 Icon(
                     imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,

@@ -19,7 +19,7 @@ class AlarmReceiver: BroadcastReceiver() {
         try {
             val message = intent?.getStringExtra("EXTRA_MESSAGE") ?: return
             if(context!=null) {
-                NotificationHelper(context).createNotification(title = "HIVmanager", message = message)
+                NotificationHelper(context).createNotification(title = "Saqtan", message = message)
             }
             val pm = context!!.getSystemService(Context.POWER_SERVICE) as PowerManager
             val isScreenOn =

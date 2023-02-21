@@ -3,5 +3,5 @@ package com.saqtan.saqtan.data.model
  * */
 object Constants {
     val USERS: String = "users"
-    val CHANNEL_ID = "HIV_manager_channel_id"
+    val CHANNEL_ID = "Saqtan_channel_id"
 }

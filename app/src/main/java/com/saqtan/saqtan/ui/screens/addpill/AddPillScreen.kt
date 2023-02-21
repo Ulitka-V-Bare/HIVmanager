@@ -110,7 +110,7 @@ private fun AddPillScreenUi(
     )
 
     Scaffold(
-        topBar = { MyTopAppBar("Добавить напоминание",onBackClick = onBackClick) },
+        topBar = { MyTopAppBar("Ескертулер қосу",onBackClick = onBackClick) },
         bottomBar = { BottomNavBar(bottomNavBarNavigationEventSender) },
         floatingActionButton = {
             MyFloatingActionButton(
@@ -127,25 +127,25 @@ private fun AddPillScreenUi(
             datePickerDialog(dateDialogState = dateDialogState, onDatePick = onPillStartDatePick)
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Медикамент")
+            Text(text = "Дәрі-дәрмек")
             AddPillTextField(
                 value = pillName,
                 onValueChange = onPillNameChange,
-                label = {Text(text = "Название и разовая дозировка")}
+                label = {Text(text = "Аты және бір реттік дозасы")}
                 )
             Spacer(modifier = Modifier.height(32.dp))
-            Text(text = "Начало")
+            Text(text = "Бастау кезі")
             AddPillTextField(
                 value = pillStart,
                 onValueChange = {},
-                label = {Text(text = "Первый день приема")},
+                label = {Text(text = "Қабылдау күндер саны")},
                 onClick = {
                     Log.d("AddPillScreen","entered onClick")
                     dateDialogState.show()
                 }
             )
             Spacer(modifier = Modifier.height(32.dp))
-            Text(text = "Время приема")
+            Text(text = "Қабылдау уақыты")
             LazyColumn(modifier = Modifier.heightIn(max=220.dp)){
                 itemsIndexed(pillTime){ index,time ->
                     Row(
@@ -155,7 +155,7 @@ private fun AddPillScreenUi(
                         AddPillTextField(
                             value = time,
                             onValueChange = {},
-                            label = {Text(text = "Время напоминания")},
+                            label = {Text(text = "Есерту уақыты")},
                             onClick = {}
                         )
                         IconButton(
@@ -173,15 +173,15 @@ private fun AddPillScreenUi(
 
 
             Button(onClick = { mTimePickerDialog.show() }) {
-                Text(text ="Добавить время")
+                Text(text ="Уақыт қосу")
             }
             Spacer(modifier = Modifier.height(32.dp))
-            Text(text = "Длительность курса")
+            Text(text = "Курс ұзақтығы")
             AddPillTextField(
                 value = pillDuration,
                 onValueChange = {if(it.length <= 3)
                     onPillDurationChange(it)},
-                label = {Text(text = "Количество дней")}
+                label = {Text(text = "Қабылдау күндер саны")}
             )
         }
     }

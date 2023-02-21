@@ -78,7 +78,7 @@ private fun SignInScreenUi(
             contentDescription = "Big logo"
         )
         Text(
-            text = "Введите ваш номер телефона, мы отправим на него СМС с кодом для входа в аккаунт",
+            text = "Өз нөміріңізді енгізіңіз, біз сізге СМС код жібереміз",
             modifier = Modifier
                 .constrainAs(textField) {
                     bottom.linkTo(phoneField.top, 5.dp)
@@ -106,7 +106,7 @@ private fun SignInScreenUi(
         SignInButton(
             onClick = onSendCodeButtonClick,
             modifier = Modifier
-                .width(170.dp)
+                .width(180.dp)
                 .height(40.dp)
                 .constrainAs(button) {
                     top.linkTo(phoneField.bottom, 15.dp)
@@ -117,13 +117,13 @@ private fun SignInScreenUi(
         ) {
             val text =
                 if (timerSeconds == 0)
-                    "Отправить код"
+                    "Кодты жіберу"
                 else {
                     when (timerSeconds) {
-                        60 -> "Отправить(1:00)"
-                        in 10..59 -> "Отправить(0:${timerSeconds})"
-                        in 1..9 -> "Отправить(0:0${timerSeconds})"
-                        else -> "Отправить код"
+                        60 -> "Кодты жіберу(1:00)"
+                        in 10..59 -> "Кодты жіберу(0:${timerSeconds})"
+                        in 1..9 -> "Кодты жіберу(0:0${timerSeconds})"
+                        else -> "Кодты жіберу"
                     }
 
                 }

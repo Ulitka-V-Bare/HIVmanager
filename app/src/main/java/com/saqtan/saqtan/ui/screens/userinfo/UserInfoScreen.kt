@@ -45,7 +45,9 @@ fun UserInfoScreen(
     }
     DiaryScreenUi(
         diaryList = viewModel.userData.diaryEntries,
-        onBackClick = {viewModel.sendNavigationEvent(NavigationEvent.NavigateUp)}
+        onBackClick = {viewModel.sendNavigationEvent(NavigationEvent.NavigateUp)},
+        height = viewModel.userData.height,
+        allergies = viewModel.userData.allergies
     )
 }
 
@@ -60,17 +62,20 @@ private fun DiaryScreenUi(
     onBackClick:()->Unit = {}
 ) {
     Scaffold(
-        topBar = { MyTopAppBar("Дневник", onBackClick = onBackClick) },
+        topBar = { MyTopAppBar("Күнделік", onBackClick = onBackClick) },
     ) {
         LazyColumn(modifier = Modifier.padding(it)) {
             item{
-                Text(text = "Рост: $height", modifier = Modifier.padding(8.dp))
+                Text(text = "Бой өлшемі: $height", modifier = Modifier.padding(8.dp))
             }
             item{
                 var isExpanded by remember {
                     mutableStateOf(false)
                 }
-                Text(text = "Аллергии: $allergies", modifier = Modifier
+                val allergiesSubstring = if(allergies.length<=10) allergies else  allergies.substring(0,7)
+                val text = if(isExpanded)"Аллергиялық аурулары: $allergies" else
+                    "Аллергиялық аурулары: $allergiesSubstring..."
+                Text(text = text, modifier = Modifier
                     .clickable { isExpanded = !isExpanded }
                     .padding(8.dp), maxLines = if(isExpanded) Int.MAX_VALUE else 1)
                 Divider(thickness = 1.dp)
@@ -200,7 +205,7 @@ private fun commentHolder(comment: String = "my comment") {
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Комментарий", modifier = Modifier.padding(start = 8.dp))
+            Text(text = "Пікірлер", modifier = Modifier.padding(start = 8.dp))
             IconButton(onClick = { isExpanded = !isExpanded }) {
                 Icon(
                     imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
